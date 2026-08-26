@@ -1,13 +1,13 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-// Webhooks require a service role key to bypass RLS and perform admin actions safely
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || 'http://127.0.0.1:54021',
-  process.env.SUPABASE_SERVICE_ROLE_KEY! // ensure you have this in .env.local
-);
-
 export async function GET(req: Request) {
+  // Initialize inside handler so env vars are available at runtime, not build time
+  const supabaseAdmin = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+
   try {
     const { searchParams } = new URL(req.url);
     const bookingId = searchParams.get('bookingId');
