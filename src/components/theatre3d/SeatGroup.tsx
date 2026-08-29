@@ -69,17 +69,10 @@ export function SeatGroup({ seats, onSeatClick }: SeatGroupProps) {
       if (isComparing) {
         addCompareSeat(seat.id);
       } else {
-        const isCurrentlySelected = selectedSeatIds.includes(seat.id);
-        
-        // Always toggle the seat hold first
-        if (onSeatClick) onSeatClick(seat.id);
-        else toggleSeatSelection(seat.id);
-
-        // Then jump into the seat preview only if we are selecting it
-        if (!isCurrentlySelected) {
-          setViewingSeatId(seat.id);
-          setViewMode('SEAT');
-        }
+        // The user wants to manually select seats via the HUD button.
+        // Clicking just previews the seat view.
+        setViewingSeatId(seat.id);
+        setViewMode('SEAT');
       }
     }
   };

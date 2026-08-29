@@ -4,11 +4,12 @@ import { useBookingStore } from '@/store/useBookingStore';
 import { type Seat3DData } from '@/utils/seatMapping';
 
 interface SeatViewHUDProps {
+  onSeatClick?: (seatId: number) => void;
   seats: Seat3DData[];
   forcedSeatId?: number;
 }
 
-export function SeatViewHUD({ seats, forcedSeatId }: SeatViewHUDProps) {
+export function SeatViewHUD({ seats, forcedSeatId, onSeatClick }: SeatViewHUDProps) {
   const { viewMode, viewingSeatId, setViewMode, toggleSeatSelection, selectedSeatIds, addCompareSeat, isComparing } = useBookingStore();
   
   const activeSeatId = forcedSeatId || viewingSeatId;
@@ -60,7 +61,7 @@ export function SeatViewHUD({ seats, forcedSeatId }: SeatViewHUDProps) {
 
           <div className="flex flex-col gap-2">
             <button 
-              onClick={() => toggleSeatSelection(activeSeat.id)}
+              onClick={() => onSeatClick ? onSeatClick(activeSeat.id) : toggleSeatSelection(activeSeat.id)}
               className={`w-full py-3 rounded-lg font-medium transition-colors ${
                 isSelected 
                   ? 'bg-red-500/20 text-red-500 hover:bg-red-500/30' 
@@ -82,3 +83,4 @@ export function SeatViewHUD({ seats, forcedSeatId }: SeatViewHUDProps) {
     </div>
   );
 }
+

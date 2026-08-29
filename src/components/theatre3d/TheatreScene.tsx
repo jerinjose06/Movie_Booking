@@ -26,7 +26,7 @@ export function TheatreScene({ liveSeats, onSeatClick }: TheatreSceneProps) {
     <div className="relative w-full h-full min-h-[600px] bg-black rounded-lg overflow-hidden border border-gray-800">
       
       {!isComparing && (
-        <SeatViewHUD seats={seats3D} forcedSeatId={viewingSeatId || undefined} />
+        <SeatViewHUD seats={seats3D} forcedSeatId={viewingSeatId || undefined} onSeatClick={onSeatClick} />
       )}
       
       {isComparing && (
@@ -46,3 +46,4 @@ export function TheatreScene({ liveSeats, onSeatClick }: TheatreSceneProps) {
     </div>
   );
 }
+
