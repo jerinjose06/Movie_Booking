@@ -27,29 +27,29 @@ export default async function MovieDetails({ params }: { params: { movieId: stri
   if (!movie) notFound();
 
   return (
-    <div className="container mx-auto px-6 py-12 flex flex-col md:flex-row gap-12 items-start">
+    <div className="container mx-auto px-4 md:px-6 py-8 md:py-12 flex flex-col md:flex-row gap-8 md:gap-12 items-start">
       
       {/* Left Column: Poster & Play Button */}
       <div className="w-full md:w-1/3 relative rounded-3xl overflow-hidden shadow-2xl">
         <div className="aspect-[2/3] bg-gray-800 relative">
-          <div className="absolute inset-0 flex items-center justify-center text-gray-500 font-medium text-lg">
+          <div className="absolute inset-0 flex items-center justify-center text-gray-500 font-medium text-lg text-center px-4">
             {movie.title}
           </div>
         </div>
         <div className="absolute inset-0 bg-gradient-to-t from-[#121212] via-transparent to-transparent flex items-center justify-center">
-          <button className="w-20 h-20 bg-red-600/90 text-white rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(220,38,38,0.6)] hover:scale-110 transition-transform backdrop-blur-sm">
-            <Play className="w-8 h-8 ml-2" />
+          <button className="w-16 h-16 md:w-20 md:h-20 bg-red-600/90 text-white rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(220,38,38,0.6)] hover:scale-110 transition-transform backdrop-blur-sm">
+            <Play className="w-6 h-6 md:w-8 md:h-8 ml-1 md:ml-2" />
           </button>
         </div>
       </div>
 
       {/* Right Column: Details & Booking */}
       <div className="w-full md:w-2/3 flex flex-col">
-        <Link href="/" className="inline-flex items-center text-gray-400 hover:text-white mb-6 transition-colors">
+        <Link href="/" className="inline-flex items-center text-gray-400 hover:text-white mb-4 md:mb-6 transition-colors">
           <ArrowLeft className="w-5 h-5 mr-2" /> Back to Movies
         </Link>
         
-        <h1 className="text-5xl font-serif font-bold mb-4 text-white">{movie.title}</h1>
+        <h1 className="text-3xl md:text-5xl font-serif font-bold mb-4 text-white">{movie.title}</h1>
         
         <div className="flex gap-4 mb-8 text-gray-400 font-medium text-lg">
           <span className="px-4 py-1.5 border border-gray-700 rounded-full">Action</span>

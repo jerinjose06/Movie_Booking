@@ -23,8 +23,11 @@ interface TwoDSeatMapProps {
 
 export function TwoDSeatMap({ rows, selectedSeatIds, onSeatClick }: TwoDSeatMapProps) {
   return (
-    <div className="w-full bg-[#121212] overflow-x-auto p-4 mb-32 flex flex-col items-center">
-      <div className="flex flex-col items-center min-w-max mx-auto pb-4">
+    <div className="w-full bg-[#121212] relative overflow-hidden mb-32">
+      {/* Scroll indicator for mobile */}
+      <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-[#121212] to-transparent pointer-events-none md:hidden z-10"></div>
+      <div className="w-full overflow-x-auto p-4 flex flex-col md:items-center items-start">
+      <div className="flex flex-col items-center min-w-max pb-4 px-2">
         
         <div className="flex flex-col gap-3">
         {rows.map((row) => (
@@ -40,9 +43,9 @@ export function TwoDSeatMap({ rows, selectedSeatIds, onSeatClick }: TwoDSeatMapP
                 if (!seat) {
                   return (
                     <React.Fragment key={`empty-${s}`}>
-                      {hasLeftAisle && <div className="w-4" />}
-                      {hasRightAisle && <div className="w-4" />}
-                      <div className="w-6 h-6" />
+                      {hasLeftAisle && <div className="w-4 md:w-6" />}
+                      {hasRightAisle && <div className="w-4 md:w-6" />}
+                      <div className="w-9 h-9 md:w-10 md:h-10" />
                     </React.Fragment>
                   );
                 }
@@ -59,16 +62,16 @@ export function TwoDSeatMap({ rows, selectedSeatIds, onSeatClick }: TwoDSeatMapP
 
                 return (
                   <React.Fragment key={seat.id}>
-                    {hasLeftAisle && <div className="w-4" />}
-                    {hasRightAisle && <div className="w-4" />}
+                    {hasLeftAisle && <div className="w-4 md:w-6" />}
+                    {hasRightAisle && <div className="w-4 md:w-6" />}
                     <button
                       onClick={() => isAvailable || isSelected ? onSeatClick(seat.id) : null}
                       disabled={!isAvailable && !isSelected}
                       aria-label={`Seat ${row.row_identifier}${seat.seat_number}, ${seat.status}, $${seat.price}`}
                       aria-pressed={isSelected}
-                      className={`w-6 h-6 rounded-sm flex items-center justify-center text-[9px] font-medium transition-all ${bgColor}`}
+                      className={`w-9 h-9 md:w-10 md:h-10 rounded-t-md rounded-b-sm flex items-center justify-center text-[10px] md:text-xs font-medium transition-all ${bgColor}`}
                     >
-                      <span className={isSelected ? 'text-white' : 'text-transparent'}>{seat.seat_number}</span>
+                      <span className={isSelected ? 'text-white' : 'text-transparent md:text-gray-400'}>{seat.seat_number}</span>
                     </button>
                   </React.Fragment>
                 );
@@ -91,6 +94,7 @@ export function TwoDSeatMap({ rows, selectedSeatIds, onSeatClick }: TwoDSeatMapP
         <div className="flex items-center gap-2"><div className="w-3 h-3 bg-red-600 rounded-sm shadow-[0_0_5px_rgba(220,38,38,0.6)]"></div>Selected</div>
       </div>
       </div>
+    </div>
     </div>
   );
 }

@@ -176,10 +176,11 @@ export function SeatSelector({ showId, initialSeats, userId }: SeatSelectorProps
 
       {viewMode === '3D' && (
         <div className="fixed inset-0 z-50 bg-black flex flex-col">
-          <div className="absolute top-4 left-4 z-50 flex gap-4 items-center bg-white/10 backdrop-blur-md p-2 rounded-xl">
+          <div className="absolute top-4 left-0 w-full px-4 z-50">
+            <div className="flex gap-2 items-center bg-white/10 backdrop-blur-md p-2 rounded-xl overflow-x-auto whitespace-nowrap hide-scrollbar">
             <button
               onClick={() => setViewMode('2D')}
-              className="px-4 py-2 bg-white text-black font-semibold rounded-lg hover:bg-gray-200 transition-colors"
+              className="px-3 md:px-4 py-2 bg-white text-black font-semibold rounded-lg hover:bg-gray-200 transition-colors text-sm md:text-base shrink-0"
             >
               Exit 3D View
             </button>
@@ -188,7 +189,7 @@ export function SeatSelector({ showId, initialSeats, userId }: SeatSelectorProps
                 setStoreViewMode('TOP_DOWN');
                 setViewingSeatId(null);
               }}
-              className={`px-4 py-2 font-semibold rounded-lg transition-colors ${storeViewMode === 'TOP_DOWN' ? 'bg-primary text-white' : 'bg-black/40 text-white hover:bg-black/60'}`}
+              className={`px-3 md:px-4 py-2 font-semibold rounded-lg transition-colors text-sm md:text-base shrink-0 ${storeViewMode === 'TOP_DOWN' ? 'bg-primary text-white' : 'bg-black/40 text-white hover:bg-black/60'}`}
             >
               Top View
             </button>
@@ -197,7 +198,7 @@ export function SeatSelector({ showId, initialSeats, userId }: SeatSelectorProps
                 setStoreViewMode('SCREEN_VIEW');
                 setViewingSeatId(null);
               }}
-              className={`px-4 py-2 font-semibold rounded-lg transition-colors ${storeViewMode === 'SCREEN_VIEW' ? 'bg-primary text-white' : 'bg-black/40 text-white hover:bg-black/60'}`}
+              className={`px-3 md:px-4 py-2 font-semibold rounded-lg transition-colors text-sm md:text-base shrink-0 ${storeViewMode === 'SCREEN_VIEW' ? 'bg-primary text-white' : 'bg-black/40 text-white hover:bg-black/60'}`}
             >
               Screen View
             </button>
@@ -206,7 +207,7 @@ export function SeatSelector({ showId, initialSeats, userId }: SeatSelectorProps
                 setStoreViewMode('ORBIT');
                 setViewingSeatId(null);
               }}
-              className={`px-4 py-2 font-semibold rounded-lg transition-colors ${storeViewMode === 'ORBIT' ? 'bg-primary text-white' : 'bg-black/40 text-white hover:bg-black/60'}`}
+              className={`px-3 md:px-4 py-2 font-semibold rounded-lg transition-colors text-sm md:text-base shrink-0 ${storeViewMode === 'ORBIT' ? 'bg-primary text-white' : 'bg-black/40 text-white hover:bg-black/60'}`}
             >
               Free Cam
             </button>
@@ -216,12 +217,12 @@ export function SeatSelector({ showId, initialSeats, userId }: SeatSelectorProps
                   setStoreViewMode('TOP_DOWN');
                   setViewingSeatId(null);
                 }}
-                className="px-4 py-2 bg-primary/20 text-primary border border-primary/50 font-semibold rounded-lg hover:bg-primary/40 transition-colors"
+                className="px-3 md:px-4 py-2 bg-primary/20 text-primary border border-primary/50 font-semibold rounded-lg hover:bg-primary/40 transition-colors text-sm md:text-base shrink-0"
               >
                 Exit Seat
               </button>
             )}
-            <div className="flex items-center gap-2 px-4 py-2 bg-black/40 rounded-lg text-white">
+            <div className="flex items-center gap-2 px-3 md:px-4 py-2 bg-black/40 rounded-lg text-white shrink-0">
               <span className="text-sm font-medium">Show People</span>
               <button
                 onClick={() => useBookingStore.getState().setShowAvatars(!showAvatars)}
@@ -234,7 +235,7 @@ export function SeatSelector({ showId, initialSeats, userId }: SeatSelectorProps
                 }`} />
               </button>
             </div>
-            <div className="flex items-center gap-2 px-4 py-2 bg-black/40 rounded-lg text-white">
+            <div className="flex items-center gap-2 px-3 md:px-4 py-2 bg-black/40 rounded-lg text-white shrink-0">
               <span className="text-sm font-medium">Light Mode</span>
               <button
                 onClick={() => useBookingStore.getState().setLightMode(!lightMode)}
@@ -248,7 +249,10 @@ export function SeatSelector({ showId, initialSeats, userId }: SeatSelectorProps
               </button>
             </div>
           </div>
-          <TheatreScene liveSeats={seats} onSeatClick={handleSeatClick} />
+          </div>
+          <div className="flex-1 w-full relative">
+            <TheatreScene liveSeats={seats} onSeatClick={handleSeatClick} />
+          </div>
         </div>
       )}
     </div>

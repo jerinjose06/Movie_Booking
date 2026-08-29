@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -65,36 +65,36 @@ export function BookingClient({ show, initialSeats, userProfile }: any) {
   const showDate = new Date(show.start_time);
 
   return (
-    <div className="w-full max-w-[1600px] mx-auto px-6 py-12 min-h-screen">
+    <div className="w-full max-w-[1600px] mx-auto px-4 md:px-6 py-8 md:py-12 min-h-screen pb-32 lg:pb-12">
       {/* Header */}
-      <div className="flex items-center gap-6 mb-8">
-        <Link href={`/movies/${show.movie_id}`} className="w-12 h-12 border border-gray-700 rounded-full flex items-center justify-center hover:bg-gray-800 transition-colors">
-          <ArrowLeft className="w-6 h-6 text-white" />
+      <div className="flex items-center gap-4 md:gap-6 mb-6 md:mb-8">
+        <Link href={`/movies/${show.movie_id}`} className="w-10 h-10 md:w-12 md:h-12 border border-gray-700 rounded-full flex items-center justify-center hover:bg-gray-800 transition-colors shrink-0">
+          <ArrowLeft className="w-5 h-5 md:w-6 md:h-6 text-white" />
         </Link>
         <div>
-          <h1 className="text-3xl font-serif font-bold text-white">{show.movies?.title}</h1>
-          <p className="text-gray-400 mt-1">
-            {show.auditoriums?.theatres?.name} • {show.auditoriums?.name} • {showDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+          <h1 className="text-2xl md:text-3xl font-serif font-bold text-white leading-tight">{show.movies?.title}</h1>
+          <p className="text-gray-400 mt-1 text-sm md:text-base">
+            {show.auditoriums?.theatres?.name} • {show.auditoriums?.name} • {showDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
           </p>
         </div>
       </div>
       
-      <div className="flex flex-col lg:flex-row gap-8 xl:gap-12 items-start">
+      <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 xl:gap-12 items-start">
         {/* Left: Seat Map */}
-        <div className="w-full lg:w-3/4 bg-[#1e1e1e] rounded-3xl p-6 border border-gray-800 shadow-xl overflow-hidden relative">
+        <div className="w-full lg:w-3/4 bg-[#1e1e1e] rounded-2xl md:rounded-3xl p-4 md:p-6 border border-gray-800 shadow-xl overflow-hidden relative">
           <SeatSelector showId={show.id} initialSeats={initialSeats} userId={userProfile.id} />
         </div>
 
-        {/* Right: Booking Summary Panel */}
-        <div className="w-full lg:w-1/4 bg-[#1e1e1e] rounded-3xl p-8 border border-gray-800 shadow-xl sticky top-8">
-          <h3 className="text-2xl text-white font-serif font-bold mb-6">Booking Summary</h3>
+        {/* Right: Booking Summary Panel (Desktop) / Bottom Flow (Mobile) */}
+        <div className="w-full lg:w-1/4 bg-[#1e1e1e] rounded-2xl md:rounded-3xl p-6 md:p-8 border border-gray-800 shadow-xl lg:sticky lg:top-8 mb-8 lg:mb-0">
+          <h3 className="text-xl md:text-2xl text-white font-serif font-bold mb-4 md:mb-6">Booking Summary</h3>
           
           <div className="flex justify-between text-gray-400 mb-2">
             <span>Selected Seats</span>
             <span className="text-white font-bold">{selectedSeatIds.length}</span>
           </div>
           
-          <div className="flex flex-wrap gap-2 mb-6">
+          <div className="flex flex-wrap gap-2 mb-4 md:mb-6">
             {selectedSeatDetails.map((seat: any) => (
               <span key={seat.id} className="px-3 py-1 bg-gray-800 text-gray-300 rounded-md text-sm border border-gray-700">
                 {seat.row_identifier}{seat.seat_number}
@@ -103,7 +103,7 @@ export function BookingClient({ show, initialSeats, userProfile }: any) {
             {selectedSeatIds.length === 0 && <span className="text-sm text-gray-600 italic">None selected</span>}
           </div>
 
-          <div className="border-t border-gray-700 my-6 pt-6">
+          <div className="border-t border-gray-700 my-4 md:my-6 pt-4 md:pt-6 hidden lg:block">
             <div className="flex justify-between items-end mb-8">
               <span className="text-gray-400 text-lg">Total Amount</span>
               <span className="text-4xl font-bold text-white">${totalAmount.toFixed(2)}</span>
@@ -118,10 +118,29 @@ export function BookingClient({ show, initialSeats, userProfile }: any) {
                 : 'bg-gray-800 text-gray-500 cursor-not-allowed'
               }`}
             >
-              {isHolding ? 'Holding Seats...' : `Checkout`}
+              {isHolding ? 'Holding...' : `Checkout`}
             </button>
           </div>
         </div>
+      </div>
+
+      {/* Sticky Bottom Bar (Mobile Only) */}
+      <div className="lg:hidden fixed bottom-0 left-0 w-full bg-[#1a1a1a] border-t border-gray-800 p-4 shadow-[0_-10px_20px_rgba(0,0,0,0.5)] z-40 flex items-center justify-between gap-4">
+        <div>
+          <p className="text-gray-400 text-sm">Total ({selectedSeatIds.length} seats)</p>
+          <p className="text-2xl font-bold text-white">${totalAmount.toFixed(2)}</p>
+        </div>
+        <button 
+          onClick={handleCheckout}
+          disabled={selectedSeatIds.length === 0 || isHolding}
+          className={`px-8 py-3 rounded-full font-serif font-bold text-lg transition-all ${
+            selectedSeatIds.length > 0 
+            ? 'bg-gradient-to-r from-red-600 to-red-500 text-white shadow-lg' 
+            : 'bg-gray-800 text-gray-500 cursor-not-allowed'
+          }`}
+        >
+          {isHolding ? 'Holding...' : `Checkout`}
+        </button>
       </div>
     </div>
   );
