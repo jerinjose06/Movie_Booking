@@ -1,9 +1,20 @@
 import { createClient } from '@/utils/supabase/server';
 import Link from 'next/link';
 import { Bell, Search, MoreHorizontal } from 'lucide-react';
+import { redirect } from 'next/navigation';
 
 export default async function Home() {
   const supabase = await createClient();
+  
+  // Require authentication right on the homepage
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    redirect('/login?next=/');
+  }
+
+  // Get user profile
+  const { data: profile } = await supabase.from('profiles').select('full_name').eq('id', user.id).single();
+
   const { data: movies } = await supabase.from('movies').select('*').order('created_at', { ascending: false });
 
   return (
@@ -12,12 +23,11 @@ export default async function Home() {
       <header className="flex justify-between items-center mb-12">
         <div>
           <p className="text-gray-400 text-lg mb-1">Welcome back,</p>
-          <h1 className="text-4xl font-bold tracking-tight font-serif text-white">Smith Saikh</h1>
+          <h1 className="text-4xl font-bold tracking-tight font-serif text-white">{profile?.full_name || 'Guest'}</h1>
         </div>
         <div className="flex items-center gap-6 bg-[#1e1e1e] p-2 pr-6 rounded-full border border-gray-800">
-          <div className="w-12 h-12 bg-gray-600 rounded-full overflow-hidden">
-             {/* Placeholder avatar */}
-             <div className="w-full h-full bg-gradient-to-tr from-gray-500 to-gray-400" />
+          <div className="w-12 h-12 bg-gray-600 rounded-full overflow-hidden flex items-center justify-center font-bold text-lg">
+             {profile?.full_name?.charAt(0) || 'G'}
           </div>
           <button>
             <Bell className="w-6 h-6 text-gray-400 hover:text-white transition-colors" />
@@ -81,7 +91,7 @@ export default async function Home() {
                 <h3 className="font-serif font-bold text-xl mb-2 truncate text-white">{movie.title}</h3>
                 <div className="flex items-center justify-center gap-3 text-red-100 text-sm">
                   <span>Action/Drama</span>
-                  <span>⭐ 4.5</span>
+                  <span>4.5</span>
                 </div>
               </div>
             </div>
