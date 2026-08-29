@@ -25,14 +25,34 @@ export function SeatCameraController({ seats, forcedSeatId }: SeatCameraControll
   const activeSeatId = forcedSeatId || viewingSeatId;
   const isSeatView = viewMode === 'SEAT';
   const isTransitioning = useRef(false);
+  const [gyroActive, setGyroActive] = useState(false);
 
   useEffect(() => {
     isTransitioning.current = true;
+    setGyroActive(false);
     const timer = setTimeout(() => {
       isTransitioning.current = false;
-    }, 1200); // Allow 1.2s for transition
+      if (isSeatView) setGyroActive(true);
+      
+      // Snap exactly to final positions to prevent OrbitControls jumping
+      if (isSeatView && activeSeatId) {
+        const seat = seats.find(s => s.id === activeSeatId);
+        if (seat) {
+          camera.position.set(...seat.cameraPosition);
+          const camPos = new THREE.Vector3(...seat.cameraPosition);
+          const lookTarget = new THREE.Vector3(...seat.lookAtTarget);
+          const dir = lookTarget.sub(camPos).normalize();
+          const pivotPoint = camPos.clone().add(dir.multiplyScalar(0.1));
+          currentTarget.current.set(pivotPoint.x, pivotPoint.y, pivotPoint.z);
+          if (controlsRef.current) {
+            controlsRef.current.target.copy(currentTarget.current);
+            controlsRef.current.update();
+          }
+        }
+      }
+    }, 1200);
     return () => clearTimeout(timer);
-  }, [viewMode, activeSeatId]);
+  }, [viewMode, activeSeatId, seats, camera]);
 
   useFrame((state, delta) => {
     if (isTransitioning.current) {
@@ -120,11 +140,14 @@ export function SeatCameraController({ seats, forcedSeatId }: SeatCameraControll
   }
 
   const [isMobile, setIsMobile] = useState(false);
+  
+
   useEffect(() => {
     setIsMobile(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
   }, []);
 
-  if (isSeatView && isMobile) {
+
+  if (isSeatView && isMobile && gyroActive) {
     return <DeviceOrientationControls makeDefault />;
   }
 
@@ -149,4 +172,6 @@ export function SeatCameraController({ seats, forcedSeatId }: SeatCameraControll
     />
   );
 }
+
+
 
