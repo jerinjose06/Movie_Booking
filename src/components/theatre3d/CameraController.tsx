@@ -124,7 +124,7 @@ export function SeatCameraController({ seats, forcedSeatId }: SeatCameraControll
     setIsMobile(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
   }, []);
 
-  if (isMobile) {
+  if (isSeatView && isMobile) {
     return <DeviceOrientationControls makeDefault />;
   }
 
