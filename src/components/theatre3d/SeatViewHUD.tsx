@@ -23,18 +23,18 @@ export function SeatViewHUD({ seats, forcedSeatId }: SeatViewHUDProps) {
 
   return (
     <div className="absolute inset-0 pointer-events-none z-10 flex flex-col justify-between p-6">
-      <div className="flex justify-between items-start">
-        <div className="bg-black/60 backdrop-blur-md px-4 py-2 rounded-full border border-gray-700/50 pointer-events-auto">
-          <span className="text-xs font-bold text-gray-300 tracking-wider">
+      <div className="flex justify-between items-start mt-16 md:mt-16 lg:mt-0">
+        <div className="bg-black/60 backdrop-blur-md px-4 py-2 rounded-full border border-gray-700/50 pointer-events-auto flex items-center shadow-lg">
+          <span className="text-xs md:text-sm font-bold text-gray-200 tracking-wider">
             YOUR VIEW
           </span>
           <span className="mx-2 text-gray-500">•</span>
-          <span className="text-xs text-gray-400">APPROXIMATE SIMULATED VIEW</span>
+          <span className="text-[10px] md:text-xs font-semibold text-emerald-400/90 tracking-wide">SIMULATED VIEW</span>
         </div>
         
         <button 
           onClick={() => setViewMode('ORBIT')}
-          className="pointer-events-auto bg-black/60 hover:bg-black/80 backdrop-blur-md px-4 py-2 rounded-full border border-gray-700/50 text-sm font-medium transition-colors text-white"
+          className="pointer-events-auto bg-gray-900/80 hover:bg-black backdrop-blur-md px-4 py-2 rounded-full border border-gray-600 text-sm font-medium transition-all text-white shadow-lg shadow-black/50 hover:scale-105"
         >
           Back to Theatre
         </button>

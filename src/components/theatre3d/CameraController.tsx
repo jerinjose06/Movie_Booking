@@ -1,10 +1,10 @@
 'use client';
 
 import { useFrame, useThree } from '@react-three/fiber';
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import * as THREE from 'three';
 import { easing } from 'maath';
-import { OrbitControls } from '@react-three/drei';
+import { OrbitControls, DeviceOrientationControls } from '@react-three/drei';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import { useBookingStore } from '@/store/useBookingStore';
 import { type Seat3DData } from '@/utils/seatMapping';
@@ -119,6 +119,15 @@ export function SeatCameraController({ seats, forcedSeatId }: SeatCameraControll
     maxPolarAngle = Math.PI / 2;
   }
 
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    setIsMobile(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
+  }, []);
+
+  if (isMobile) {
+    return <DeviceOrientationControls makeDefault />;
+  }
+
   return (
     <OrbitControls
       ref={controlsRef}
@@ -140,3 +149,4 @@ export function SeatCameraController({ seats, forcedSeatId }: SeatCameraControll
     />
   );
 }
+

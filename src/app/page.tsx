@@ -79,13 +79,14 @@ export default async function Home() {
       {/* Grid Movies */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 md:gap-8 pb-12">
         {movies?.map((movie) => (
-          <Link href={`/movies/${movie.id}`} key={movie.id} className="flex flex-col group">
+            <Link href={`/movies/${movie.id}`} key={movie.id} className="flex flex-col group">
             <div className="ticket-cutout-top bg-gradient-to-b from-red-600 to-red-500 rounded-3xl overflow-hidden relative shadow-xl transform transition-transform group-hover:scale-[1.02] md:group-hover:scale-105 duration-300">
               <div className="aspect-[4/5] bg-gray-800 relative">
-                {/* Poster Placeholder */}
-                <div className="absolute inset-0 flex items-center justify-center text-gray-600 text-sm font-medium px-4 text-center">
-                  {movie.title}
-                </div>
+                <img 
+                  src="/inception-poster.jpg"
+                  alt={movie.title}
+                  className="w-full h-full object-cover"
+                />
               </div>
               <div className="p-4 md:p-6 text-center bg-gradient-to-b from-red-500 to-red-700">
                 <h3 className="font-serif font-bold text-lg md:text-xl mb-1 md:mb-2 truncate text-white">{movie.title}</h3>
