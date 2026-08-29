@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 
 interface Seat {
   id: number;
@@ -29,12 +29,12 @@ export function TwoDSeatMap({ rows, selectedSeatIds, onSeatClick }: TwoDSeatMapP
       <div className="w-full overflow-x-auto p-4 flex flex-col md:items-center items-start">
       <div className="flex flex-col items-center min-w-max pb-4 px-2">
         
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-1.5 md:gap-3">
         {rows.map((row) => (
-          <div key={row.id} className="flex items-center gap-3">
-            <div className="w-6 text-center font-bold text-gray-500 text-xs">{row.row_identifier}</div>
+          <div key={row.id} className="flex items-center gap-1.5 md:gap-3">
+            <div className="w-4 md:w-6 text-center font-bold text-gray-500 text-[8px] md:text-xs">{row.row_identifier}</div>
             
-            <div className="flex gap-2">
+            <div className="flex gap-1 md:gap-2">
               {Array.from({ length: 21 }, (_, i) => i + 1).map((s) => {
                 const seat = row.seats.find((st) => parseInt(st.seat_number, 10) === s);
                 const hasLeftAisle = s === 6;
@@ -43,9 +43,9 @@ export function TwoDSeatMap({ rows, selectedSeatIds, onSeatClick }: TwoDSeatMapP
                 if (!seat) {
                   return (
                     <React.Fragment key={`empty-${s}`}>
-                      {hasLeftAisle && <div className="w-4 md:w-6" />}
-                      {hasRightAisle && <div className="w-4 md:w-6" />}
-                      <div className="w-9 h-9 md:w-10 md:h-10" />
+                      {hasLeftAisle && <div className="w-2 md:w-6" />}
+                      {hasRightAisle && <div className="w-2 md:w-6" />}
+                      <div className="w-4 h-4 sm:w-6 sm:h-6 md:w-10 md:h-10" />
                     </React.Fragment>
                   );
                 }
@@ -62,14 +62,14 @@ export function TwoDSeatMap({ rows, selectedSeatIds, onSeatClick }: TwoDSeatMapP
 
                 return (
                   <React.Fragment key={seat.id}>
-                    {hasLeftAisle && <div className="w-4 md:w-6" />}
-                    {hasRightAisle && <div className="w-4 md:w-6" />}
+                    {hasLeftAisle && <div className="w-2 md:w-6" />}
+                    {hasRightAisle && <div className="w-2 md:w-6" />}
                     <button
                       onClick={() => isAvailable || isSelected ? onSeatClick(seat.id) : null}
                       disabled={!isAvailable && !isSelected}
                       aria-label={`Seat ${row.row_identifier}${seat.seat_number}, ${seat.status}, $${seat.price}`}
                       aria-pressed={isSelected}
-                      className={`w-9 h-9 md:w-10 md:h-10 rounded-t-md rounded-b-sm flex items-center justify-center text-[10px] md:text-xs font-medium transition-all ${bgColor}`}
+                      className={`w-4 h-4 sm:w-6 sm:h-6 md:w-10 md:h-10 rounded-t-md rounded-b-sm flex items-center justify-center text-[8px] md:text-xs font-medium transition-all ${bgColor}`}
                     >
                       <span className={isSelected ? 'text-white' : 'text-transparent md:text-gray-400'}>{seat.seat_number}</span>
                     </button>
@@ -78,7 +78,7 @@ export function TwoDSeatMap({ rows, selectedSeatIds, onSeatClick }: TwoDSeatMapP
               })}
             </div>
             
-            <div className="w-6 text-center font-bold text-gray-500 text-xs">{row.row_identifier}</div>
+            <div className="w-4 md:w-6 text-center font-bold text-gray-500 text-[8px] md:text-xs">{row.row_identifier}</div>
           </div>
         ))}
       </div>

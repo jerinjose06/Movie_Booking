@@ -38,7 +38,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Booking is not pending' }, { status: 400 });
     }
 
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || new URL(req.url).origin;
 
     // If using the mock key, simulate a successful Stripe redirect flow
     if (process.env.STRIPE_SECRET_KEY === undefined || process.env.STRIPE_SECRET_KEY === 'sk_test_mock') {

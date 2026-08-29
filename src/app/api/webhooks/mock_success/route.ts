@@ -63,7 +63,7 @@ export async function GET(req: Request) {
     }
 
     // Redirect to the success page
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || new URL(req.url).origin;
     return NextResponse.redirect(`${baseUrl}/tickets/${ref}`);
   } catch (error: any) {
     console.error('Mock webhook processing error:', error);
