@@ -148,7 +148,9 @@ export function SeatCameraController({ seats, forcedSeatId }: SeatCameraControll
 
 
   if (isSeatView && isMobile && gyroActive) {
-    return <DeviceOrientationControls makeDefault />;
+    // Math.PI (180 degrees) offset to ensure the camera looks at the screen (-Z) 
+    // instead of the back of the theatre (+Z) which is the default for DeviceOrientationControls
+    return <DeviceOrientationControls makeDefault alphaOffset={Math.PI} />;
   }
 
   return (
