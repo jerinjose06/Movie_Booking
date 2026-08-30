@@ -4,8 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
 import { signInUser, signUpUser } from './actions';
-import { AlertCircle, Eye, EyeOff, ArrowLeft } from 'lucide-react';
-import Link from 'next/link';
+import { AlertCircle, Eye, EyeOff } from 'lucide-react';
 
 function LoginContent() {
   const [activeTab, setActiveTab] = useState<'login' | 'signup'>('login');
@@ -46,7 +45,7 @@ function LoginContent() {
   };
 
   return (
-    <div className="min-h-screen bg-[#121212] flex flex-col items-center justify-center px-4 py-12">
+    <div className="min-h-screen bg-[#121212] flex items-center justify-center px-4 py-12">
       {/* Inject custom shake keyframes */}
       <style dangerouslySetInnerHTML={{__html: `
         @keyframes shake {
@@ -58,13 +57,6 @@ function LoginContent() {
           animation: shake 0.4s ease-in-out;
         }
       `}} />
-
-      <div className="max-w-md w-full mb-4">
-        <Link href="/" className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors">
-          <ArrowLeft className="w-4 h-4" />
-          <span>Back to Home</span>
-        </Link>
-      </div>
 
       <div className={`max-w-md w-full ticket-cutout bg-[#1a1a1a] border border-gray-800 rounded-2xl overflow-hidden shadow-2xl transition-all duration-350 ${shake ? 'shake-anim border-red-500/50' : ''}`}>
         <div className="h-2 bg-gradient-to-r from-red-600 to-red-500 w-full" />
