@@ -2,6 +2,7 @@
 
 import { Canvas } from '@react-three/fiber';
 import { Suspense, useMemo } from 'react';
+import * as THREE from 'three';
 import { TheatreEnvironment } from './TheatreEnvironment';
 import { SeatCameraController } from './CameraController';
 import { Auditorium } from './Auditorium';
@@ -33,7 +34,21 @@ export function TheatreScene({ liveSeats, onSeatClick }: TheatreSceneProps) {
         <CompareHUD seats={seats3D} />
       )}
 
-      <Canvas shadows camera={{ position: [0, 5, 10], fov: 50 }}>
+      <Canvas 
+        gl={{ 
+          antialias: true, 
+          alpha: false,
+          powerPreference: 'high-performance',
+          toneMapping: THREE.ACESFilmicToneMapping,
+          toneMappingExposure: 1.0
+        }} 
+        camera={{ 
+          position: [0, 5, 10], 
+          fov: 50,
+          near: 0.1,
+          far: 200
+        }}
+      >
         <Suspense fallback={null}>
           <TheatreEnvironment />
           <SeatCameraController seats={seats3D} forcedSeatId={viewingSeatId || undefined} />
@@ -46,4 +61,3 @@ export function TheatreScene({ liveSeats, onSeatClick }: TheatreSceneProps) {
     </div>
   );
 }
-

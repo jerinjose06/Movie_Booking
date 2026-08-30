@@ -1,4 +1,4 @@
-import { createClient } from '@/utils/supabase/server';
+﻿import { createClient } from '@/utils/supabase/server';
 import Link from 'next/link';
 
 export default async function MoviesPage() {
@@ -6,19 +6,28 @@ export default async function MoviesPage() {
   const { data: movies } = await supabase.from('movies').select('*').order('created_at', { ascending: false });
 
   return (
-    <div className="flex flex-col min-h-screen px-6 py-8 bg-[#121212] pb-32">
+    <div className="container mx-auto px-4 md:px-6 py-6 md:py-12 min-h-screen pb-32">
       <h1 className="text-3xl font-serif font-bold mb-8 text-white">All Movies</h1>
       
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 md:gap-8">
         {movies?.map((movie) => (
-          <Link href={`/movies/${movie.id}`} key={movie.id} className="group flex flex-col">
-            <div className="bg-gray-800 aspect-[2/3] rounded-2xl mb-3 overflow-hidden shadow-sm group-hover:shadow-lg transition-shadow relative">
-              <div className="absolute inset-0 flex items-center justify-center text-gray-500 font-medium text-sm p-4 text-center">
-                {movie.title}
+          <Link href={`/movies/${movie.id}`} key={movie.id} className="flex flex-col group">
+            <div className="ticket-cutout-top bg-gradient-to-b from-red-600 to-red-500 rounded-3xl overflow-hidden relative shadow-xl transform transition-transform group-hover:scale-[1.02] md:group-hover:scale-105 duration-300">
+              <div className="aspect-[4/5] bg-gray-800 relative">
+                <img 
+                  src={movie.poster_url || "/inception-poster.jpg"}
+                  alt={movie.title}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="p-4 md:p-6 text-center bg-gradient-to-b from-red-500 to-red-700">
+                <h3 className="font-serif font-bold text-lg md:text-xl mb-1 md:mb-2 truncate text-white">{movie.title}</h3>
+                <div className="flex items-center justify-center gap-3 text-red-100 text-xs md:text-sm">
+                  <span>{movie.category || 'Action/Drama'}</span>
+                  <span>{movie.duration_mins} mins</span>
+                </div>
               </div>
             </div>
-            <h2 className="text-sm font-bold text-gray-200 group-hover:text-red-500 transition-colors truncate">{movie.title}</h2>
-            <p className="text-xs text-gray-500">{movie.duration_mins} mins</p>
           </Link>
         ))}
         {(!movies || movies.length === 0) && (

@@ -89,7 +89,7 @@ export function SeatGroup({ seats, onSeatClick }: SeatGroupProps) {
   const renderInstances = (seatGroup: Seat3DData[], material: THREE.Material) => {
     if (seatGroup.length === 0) return null;
     return (
-      <Instances geometry={completeSeatGeometry} material={material} castShadow receiveShadow>
+      <Instances geometry={completeSeatGeometry} material={material}>
         {seatGroup.map((seat) => (
           <Instance
             key={`inst-${seat.id}`}
@@ -146,7 +146,7 @@ export function SeatGroup({ seats, onSeatClick }: SeatGroupProps) {
             </div>
             <div className="text-sm text-gray-300 flex justify-between gap-4">
               <span>Price:</span>
-              <span className="text-white">${hoveredSeat.price.toFixed(2)}</span>
+              <span className="text-white">₹{hoveredSeat.price.toFixed(2)}</span>
             </div>
           </div>
         </Html>

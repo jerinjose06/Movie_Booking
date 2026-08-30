@@ -68,7 +68,7 @@ export function BookingSummary({ selectedSeats, holdExpiresAt, onCheckout, isLoa
           selectedSeats.map((seat) => (
             <div key={seat.id} className="flex justify-between items-center text-sm border-b border-gray-100 pb-2">
               <span className="text-gray-600">Seat {seat.row_identifier}{seat.seat_number}</span>
-              <span className="font-medium">${seat.price.toFixed(2)}</span>
+              <span className="font-medium">₹{seat.price.toFixed(2)}</span>
             </div>
           ))
         )}
@@ -76,7 +76,7 @@ export function BookingSummary({ selectedSeats, holdExpiresAt, onCheckout, isLoa
 
       <div className="flex justify-between items-center text-lg font-bold mb-6 pt-4 border-t border-gray-200 text-gray-900">
         <span>Total</span>
-        <span>${total.toFixed(2)}</span>
+        <span>₹{total.toFixed(2)}</span>
       </div>
 
       <button

@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -48,6 +48,14 @@ export function BookingClient({ show, initialSeats, userProfile }: any) {
       if (seatError || !seatUpdatedCount || seatUpdatedCount !== selectedSeatIds.length) {
         throw new Error(seatError?.message || 'Failed to confirm seat holds.');
       }
+
+      // Also insert booking_items so seats are explicitly linked
+      const itemsToInsert = selectedSeatDetails.map((seat: any) => ({
+        booking_id: booking.id,
+        show_seat_id: seat.show_seat_id,
+        price: seat.price
+      }));
+      await supabase.from('booking_items').insert(itemsToInsert);
 
       await fetch('/api/checkout', {
         method: 'POST',
@@ -106,7 +114,7 @@ export function BookingClient({ show, initialSeats, userProfile }: any) {
           <div className="border-t border-gray-700 my-4 md:my-6 pt-4 md:pt-6 hidden lg:block">
             <div className="flex justify-between items-end mb-8">
               <span className="text-gray-400 text-lg">Total Amount</span>
-              <span className="text-4xl font-bold text-white">${totalAmount.toFixed(2)}</span>
+              <span className="text-4xl font-bold text-white">₹{totalAmount.toFixed(2)}</span>
             </div>
             
             <button 
@@ -128,7 +136,7 @@ export function BookingClient({ show, initialSeats, userProfile }: any) {
       <div className="lg:hidden fixed bottom-0 left-0 w-full bg-[#1a1a1a] border-t border-gray-800 p-4 shadow-[0_-10px_20px_rgba(0,0,0,0.5)] z-40 flex items-center justify-between gap-4">
         <div>
           <p className="text-gray-400 text-sm">Total ({selectedSeatIds.length} seats)</p>
-          <p className="text-2xl font-bold text-white">${totalAmount.toFixed(2)}</p>
+          <p className="text-2xl font-bold text-white">₹{totalAmount.toFixed(2)}</p>
         </div>
         <button 
           onClick={handleCheckout}

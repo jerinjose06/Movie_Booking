@@ -25,10 +25,10 @@ export default async function CheckoutPage({ params }: { params: { bookingId: st
   }
 
   return (
-    <div className="container mx-auto py-12 px-4">
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold mb-2">Complete Your Booking</h1>
-        <p className="text-gray-600">You&apos;re booking tickets for {booking.shows?.movies?.title}</p>
+    <div className="container mx-auto py-8 md:py-12 px-4">
+      <div className="text-center mb-6 md:mb-8">
+        <h1 className="text-2xl md:text-3xl font-bold font-serif mb-2 text-white">Complete Your Booking</h1>
+        <p className="text-gray-400 text-sm md:text-base">You&apos;re booking tickets for {booking.shows?.movies?.title}</p>
       </div>
       <CheckoutClient booking={booking} />
     </div>

@@ -28,7 +28,7 @@ export default async function MovieDetails({ params }: { params: { movieId: stri
   if (!movie) notFound();
 
   // Fake data for demo
-  const posterUrl = "/inception-poster.jpg";
+  const posterUrl = movie.poster_url || "/inception-poster.jpg";
   const trailerUrl = "https://images.unsplash.com/photo-1440404653325-ab127d49abc1?auto=format&fit=crop&w=1200&q=80"; // Cinematic trailer placeholder
   const actors = [
     { name: "Leonardo D.", role: "Cobb", img: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=150&h=150&q=80" },
@@ -55,13 +55,13 @@ export default async function MovieDetails({ params }: { params: { movieId: stri
         
         <h1 className="text-3xl md:text-5xl font-serif font-bold mb-4 text-white">{movie.title}</h1>
         
-        <div className="flex gap-4 mb-8 text-gray-400 font-medium text-lg">
-          <span className="px-4 py-1.5 border border-gray-700 rounded-full">Action</span>
-          <span className="px-4 py-1.5 border border-gray-700 rounded-full">{movie.duration_mins} mins</span>
-          <span className="px-4 py-1.5 border border-gray-700 rounded-full">★ 4.8</span>
+        <div className="flex flex-wrap gap-2 md:gap-4 mb-6 md:mb-8 text-gray-400 font-medium text-sm md:text-lg">
+          <span className="px-3 md:px-4 py-1 md:py-1.5 border border-gray-700 rounded-full">Action</span>
+          <span className="px-3 md:px-4 py-1 md:py-1.5 border border-gray-700 rounded-full">{movie.duration_mins} mins</span>
+          <span className="px-3 md:px-4 py-1 md:py-1.5 border border-gray-700 rounded-full">★ 4.8</span>
         </div>
         
-        <p className="text-gray-300 text-lg leading-relaxed mb-10 max-w-3xl">
+        <p className="text-gray-300 text-base md:text-lg leading-relaxed mb-8 md:mb-10 max-w-3xl">
           {movie.description || 'A brilliant scientist discovers a way to communicate with the past, but changing history has devastating consequences for the future.'}
         </p>
 
@@ -127,3 +127,4 @@ export default async function MovieDetails({ params }: { params: { movieId: stri
     </div>
   );
 }
+

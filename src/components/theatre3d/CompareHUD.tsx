@@ -59,7 +59,7 @@ export function CompareHUD({ seats }: CompareHUDProps) {
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-xl font-bold text-white">${seat.price.toFixed(2)}</div>
+                  <div className="text-xl font-bold text-white">₹{seat.price.toFixed(2)}</div>
                   <button 
                     onClick={() => removeCompareSeat(seat.id)}
                     className="text-xs text-gray-400 hover:text-red-400 mt-1 transition-colors"

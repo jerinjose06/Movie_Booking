@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 
 interface Seat {
   id: number;
@@ -7,6 +7,9 @@ interface Seat {
   type_id: number;
   status: 'AVAILABLE' | 'HELD' | 'BOOKED' | 'BLOCKED';
   price: number;
+  pos_x?: number;
+  pos_y?: number;
+  pos_z?: number;
 }
 
 interface Row {
@@ -22,79 +25,108 @@ interface TwoDSeatMapProps {
 }
 
 export function TwoDSeatMap({ rows, selectedSeatIds, onSeatClick }: TwoDSeatMapProps) {
+  // Sort rows in reverse (e.g. J, I, H ... B, A) so Row A (front row) is closest to the screen at the bottom
+  const sortedRows = [...rows].sort((a, b) => b.row_identifier.localeCompare(a.row_identifier));
+
   return (
-    <div className="w-full bg-[#121212] relative overflow-hidden mb-32">
+    <div className="w-full bg-[#121212] relative overflow-hidden mb-12 select-none">
       {/* Scroll indicator for mobile */}
-      <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-[#121212] to-transparent pointer-events-none md:hidden z-10"></div>
-      <div className="w-full overflow-x-auto p-4 flex flex-col md:items-center items-start">
-      <div className="flex flex-col items-center min-w-max pb-4 px-2">
-        
-        <div className="flex flex-col gap-1.5 md:gap-3">
-        {rows.map((row) => (
-          <div key={row.id} className="flex items-center gap-1.5 md:gap-3">
-            <div className="w-4 md:w-6 text-center font-bold text-gray-500 text-[8px] md:text-xs">{row.row_identifier}</div>
-            
-            <div className="flex gap-1 md:gap-2">
-              {Array.from({ length: 21 }, (_, i) => i + 1).map((s) => {
-                const seat = row.seats.find((st) => parseInt(st.seat_number, 10) === s);
-                const hasLeftAisle = s === 6;
-                const hasRightAisle = s === 17;
+      <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-[#121212] to-transparent pointer-events-none md:hidden z-10" />
 
-                if (!seat) {
-                  return (
-                    <React.Fragment key={`empty-${s}`}>
-                      {hasLeftAisle && <div className="w-2 md:w-6" />}
-                      {hasRightAisle && <div className="w-2 md:w-6" />}
-                      <div className="w-4 h-4 sm:w-6 sm:h-6 md:w-10 md:h-10" />
-                    </React.Fragment>
-                  );
+      <div className="w-full overflow-x-auto p-4 flex flex-col items-center">
+        <div className="flex flex-col items-center min-w-max pb-4 px-4">
+          
+          {/* Seat Grid */}
+          <div className="flex flex-col gap-2 md:gap-3 pt-4">
+            {sortedRows.map((row) => {
+              // Sort seats by physical X position or seat number
+              const sortedSeats = [...row.seats].sort((a, b) => {
+                if (a.pos_x !== undefined && b.pos_x !== undefined) {
+                  return a.pos_x - b.pos_x;
                 }
+                return parseInt(a.seat_number, 10) - parseInt(b.seat_number, 10);
+              });
 
-                const isSelected = selectedSeatIds.includes(seat.id);
-                const isAvailable = seat.status === 'AVAILABLE';
-                
-                let bgColor = 'bg-gray-800'; // Default / Blocked / Booked
-                if (isSelected) {
-                  bgColor = 'bg-red-600 shadow-[0_0_10px_rgba(220,38,38,0.6)]';
-                } else if (isAvailable) {
-                  bgColor = 'bg-white hover:bg-red-100 transition-colors cursor-pointer';
-                }
+              return (
+                <div key={row.id} className="flex items-center gap-2 md:gap-4">
+                  {/* Left Row Label */}
+                  <div className="w-4 md:w-6 text-center font-bold text-gray-500 text-xs md:text-sm">
+                    {row.row_identifier}
+                  </div>
+                  
+                  {/* Seats & Dynamic Aisles */}
+                  <div className="flex items-center gap-1.5 md:gap-2">
+                    {sortedSeats.map((seat, index) => {
+                      // Check for aisle gap based on pos_x distance between adjacent seats
+                      let hasAisleBefore = false;
+                      const prevSeat = index > 0 ? sortedSeats[index - 1] : undefined;
+                      if (prevSeat && seat.pos_x !== undefined && prevSeat.pos_x !== undefined) {
+                        const gap = seat.pos_x - prevSeat.pos_x;
+                        if (gap > 1.5) {
+                          hasAisleBefore = true;
+                        }
+                      }
 
-                return (
-                  <React.Fragment key={seat.id}>
-                    {hasLeftAisle && <div className="w-2 md:w-6" />}
-                    {hasRightAisle && <div className="w-2 md:w-6" />}
-                    <button
-                      onClick={() => isAvailable || isSelected ? onSeatClick(seat.id) : null}
-                      disabled={!isAvailable && !isSelected}
-                      aria-label={`Seat ${row.row_identifier}${seat.seat_number}, ${seat.status}, $${seat.price}`}
-                      aria-pressed={isSelected}
-                      className={`w-4 h-4 sm:w-6 sm:h-6 md:w-10 md:h-10 rounded-t-md rounded-b-sm flex items-center justify-center text-[8px] md:text-xs font-medium transition-all ${bgColor}`}
-                    >
-                      <span className={isSelected ? 'text-white' : 'text-transparent md:text-gray-400'}>{seat.seat_number}</span>
-                    </button>
-                  </React.Fragment>
-                );
-              })}
-            </div>
-            
-            <div className="w-4 md:w-6 text-center font-bold text-gray-500 text-[8px] md:text-xs">{row.row_identifier}</div>
+                      const isSelected = selectedSeatIds.includes(seat.id);
+                      const isAvailable = seat.status === 'AVAILABLE';
+                      
+                      let bgColor = 'bg-gray-800 text-gray-600 cursor-not-allowed'; // Booked / Blocked
+                      if (isSelected) {
+                        bgColor = 'bg-red-600 text-white shadow-[0_0_12px_rgba(220,38,38,0.7)] ring-2 ring-red-400';
+                      } else if (isAvailable) {
+                        bgColor = 'bg-white hover:bg-red-50 text-gray-800 hover:text-red-600 transition-all cursor-pointer shadow-sm';
+                      }
+
+                      return (
+                        <React.Fragment key={seat.id}>
+                          {hasAisleBefore && (
+                            <div className="w-5 sm:w-8 md:w-10 flex-shrink-0" aria-hidden="true" />
+                          )}
+                          <button
+                            onClick={() => (isAvailable || isSelected ? onSeatClick(seat.id) : null)}
+                            disabled={!isAvailable && !isSelected}
+                            aria-label={`Seat ${row.row_identifier}${seat.seat_number}, ${seat.status}, ₹${seat.price}`}
+                            aria-pressed={isSelected}
+                            className={`w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-t-lg rounded-b-sm flex items-center justify-center text-[10px] md:text-xs font-bold transition-transform active:scale-95 ${bgColor}`}
+                          >
+                            <span>{seat.seat_number}</span>
+                          </button>
+                        </React.Fragment>
+                      );
+                    })}
+                  </div>
+                  
+                  {/* Right Row Label */}
+                  <div className="w-4 md:w-6 text-center font-bold text-gray-500 text-xs md:text-sm">
+                    {row.row_identifier}
+                  </div>
+                </div>
+              );
+            })}
           </div>
-        ))}
-      </div>
-      
-      {/* Glowing Red Screen at Bottom */}
-      <div className="w-[80vw] max-w-[400px] h-12 border-b-[3px] border-red-600 rounded-b-[100px] mt-12 mb-4 flex flex-col items-center justify-end text-sm font-serif font-bold text-gray-300 shadow-[0_15px_30px_rgba(220,38,38,0.2)]">
-        <span className="mb-4 opacity-50">SCREEN</span>
-      </div>
 
-      <div className="mt-8 flex justify-center gap-6 text-xs text-gray-500 font-medium">
-        <div className="flex items-center gap-2"><div className="w-3 h-3 bg-gray-800 rounded-sm"></div>Booked</div>
-        <div className="flex items-center gap-2"><div className="w-3 h-3 bg-white rounded-sm border border-gray-300"></div>Empty</div>
-        <div className="flex items-center gap-2"><div className="w-3 h-3 bg-red-600 rounded-sm shadow-[0_0_5px_rgba(220,38,38,0.6)]"></div>Selected</div>
+          {/* Glowing Red Screen at Bottom (Front of Theatre) */}
+          <div className="w-[85vw] max-w-[520px] h-12 border-b-[3px] border-red-600 rounded-b-[140px] mt-12 mb-6 flex flex-col items-center justify-end text-[11px] font-serif font-bold tracking-[0.25em] text-gray-400 shadow-[0_15px_30px_rgba(220,38,38,0.3)]">
+            <span className="mb-3 opacity-70">SCREEN THIS WAY</span>
+          </div>
+
+          {/* Legend */}
+          <div className="mt-8 flex justify-center items-center gap-6 sm:gap-8 text-xs text-gray-400 font-medium border-t border-gray-800/80 pt-6 w-full">
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 bg-white rounded-t-md rounded-b-sm shadow-sm" />
+              <span>Available</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 bg-red-600 rounded-t-md rounded-b-sm shadow-[0_0_8px_rgba(220,38,38,0.6)]" />
+              <span>Selected</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 bg-gray-800 rounded-t-md rounded-b-sm" />
+              <span>Booked</span>
+            </div>
+          </div>
+        </div>
       </div>
-      </div>
-    </div>
     </div>
   );
 }

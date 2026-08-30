@@ -51,7 +51,7 @@ export function SeatViewHUD({ seats, forcedSeatId, onSeatClick }: SeatViewHUDPro
           <div className="space-y-2 mb-6 text-sm">
             <div className="flex justify-between">
               <span className="text-gray-400">Price</span>
-              <span className="text-white font-medium">${activeSeat.price.toFixed(2)}</span>
+              <span className="text-white font-medium">₹{activeSeat.price.toFixed(2)}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-400">Viewing Dist.</span>

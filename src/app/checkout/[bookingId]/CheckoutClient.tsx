@@ -41,12 +41,12 @@ export function CheckoutClient({ booking }: { booking: any }) {
   };
 
   return (
-    <div className="bg-white p-8 rounded-xl border border-gray-200 shadow-sm max-w-xl mx-auto">
-      <h2 className="text-2xl font-bold mb-6">Payment Summary</h2>
-      <div className="bg-gray-50 p-4 rounded-lg mb-6 border border-gray-200">
+    <div className="bg-[#1a1a1a] p-6 md:p-8 rounded-2xl border border-gray-800 shadow-xl max-w-xl mx-auto text-white">
+      <h2 className="text-xl md:text-2xl font-serif font-bold mb-6">Payment Summary</h2>
+      <div className="bg-[#121212] p-4 md:p-5 rounded-xl mb-6 border border-gray-800">
         <div className="flex justify-between items-center text-lg font-bold">
-          <span>Total Amount</span>
-          <span>${booking.total_amount.toFixed(2)}</span>
+          <span className="text-gray-300">Total Amount</span>
+          <span className="text-green-400 text-2xl font-mono">₹{booking.total_amount.toFixed(2)}</span>
         </div>
       </div>
 
@@ -54,12 +54,12 @@ export function CheckoutClient({ booking }: { booking: any }) {
         <button 
           type="submit" 
           disabled={isProcessing}
-          className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white py-4 rounded-lg font-bold text-lg mt-6 transition-colors flex justify-center items-center"
+          className="w-full bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white py-4 rounded-xl font-serif font-bold text-lg mt-6 transition-all shadow-lg shadow-red-950/30 flex justify-center items-center"
         >
           {isProcessing ? (
             <span className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
           ) : (
-            `Pay with Stripe ($${booking.total_amount.toFixed(2)})`
+            `Proceed to Pay (₹${booking.total_amount.toFixed(2)})`
           )}
         </button>
       </form>

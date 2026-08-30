@@ -1,11 +1,13 @@
 'use client';
 
 // Removed useEffect
+import * as React from 'react';
 import { useEditorStore } from '@/store/useEditorStore';
 import { EditorScene } from '@/components/admin/editor/EditorScene';
 import Link from 'next/link';
 
-export default function EditorPage({ params }: { params: { auditoriumId: string } }) {
+export default function EditorPage({ params }: { params: Promise<{ auditoriumId: string }> }) {
+  const { auditoriumId } = React.use(params);
   const { mode, setMode, selectedSeatIds, duplicateSelected, deleteSelected, addSeat } = useEditorStore();
 
   return (
@@ -14,7 +16,7 @@ export default function EditorPage({ params }: { params: { auditoriumId: string 
       <div className="w-64 bg-gray-800 border-r border-gray-700 flex flex-col z-10 shadow-2xl">
         <div className="p-4 border-b border-gray-700">
           <h2 className="font-bold text-lg">Layout Editor</h2>
-          <Link href={`/admin/auditoriums/${params.auditoriumId}`} className="text-sm text-blue-400 hover:text-blue-300">
+          <Link href={`/admin/auditoriums/${auditoriumId}`} className="text-sm text-blue-400 hover:text-blue-300">
             &larr; Exit to Settings
           </Link>
         </div>

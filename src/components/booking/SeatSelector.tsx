@@ -1,13 +1,26 @@
 'use client';
 
 import React, { useState, useMemo, useCallback } from 'react';
+import dynamic from 'next/dynamic';
 import { TwoDSeatMap } from './TwoDSeatMap';
-import { TheatreScene } from '../theatre3d/TheatreScene';
 import { useBookingStore } from '@/store/useBookingStore';
 import { useRealtimeSeats } from '@/hooks/useRealtimeSeats';
 import { type SeatData } from '@/utils/seatMapping';
-import { MonitorPlay, LayoutGrid, Wifi, WifiOff } from 'lucide-react';
+import { MonitorPlay, LayoutGrid, Wifi, WifiOff, Loader2 } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
+
+const TheatreScene = dynamic(
+  () => import('../theatre3d/TheatreScene').then((mod) => mod.TheatreScene),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-full flex flex-col items-center justify-center bg-black/90 text-white min-h-[400px]">
+        <Loader2 className="w-10 h-10 animate-spin text-red-500 mb-3" />
+        <p className="font-serif text-lg">Loading 3D Cinema Experience...</p>
+      </div>
+    ),
+  }
+);
 
 interface SeatSelectorProps {
   showId: string;
