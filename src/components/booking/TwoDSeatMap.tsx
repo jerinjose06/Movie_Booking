@@ -25,8 +25,19 @@ interface TwoDSeatMapProps {
 }
 
 export function TwoDSeatMap({ rows, selectedSeatIds, onSeatClick }: TwoDSeatMapProps) {
-  // Sort rows in reverse (e.g. J, I, H ... B, A) so Row A (front row) is closest to the screen at the bottom
-  const sortedRows = [...rows].sort((a, b) => b.row_identifier.localeCompare(a.row_identifier));
+  // Sort rows in reverse and seats horizontally once
+  const processedRows = React.useMemo(() => {
+    const sorted = [...rows].sort((a, b) => b.row_identifier.localeCompare(a.row_identifier));
+    return sorted.map(row => ({
+      ...row,
+      seats: [...row.seats].sort((a, b) => {
+        if (a.pos_x !== undefined && b.pos_x !== undefined) {
+          return a.pos_x - b.pos_x;
+        }
+        return parseInt(a.seat_number, 10) - parseInt(b.seat_number, 10);
+      })
+    }));
+  }, [rows]);
 
   return (
     <div className="w-full bg-[#121212] relative overflow-hidden mb-12 select-none">
@@ -38,14 +49,8 @@ export function TwoDSeatMap({ rows, selectedSeatIds, onSeatClick }: TwoDSeatMapP
           
           {/* Seat Grid */}
           <div className="flex flex-col gap-2 md:gap-3 pt-4">
-            {sortedRows.map((row) => {
-              // Sort seats by physical X position or seat number
-              const sortedSeats = [...row.seats].sort((a, b) => {
-                if (a.pos_x !== undefined && b.pos_x !== undefined) {
-                  return a.pos_x - b.pos_x;
-                }
-                return parseInt(a.seat_number, 10) - parseInt(b.seat_number, 10);
-              });
+            {processedRows.map((row) => {
+              const sortedSeats = row.seats;
 
               return (
                 <div key={row.id} className="flex items-center gap-2 md:gap-4">

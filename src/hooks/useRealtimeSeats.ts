@@ -44,7 +44,8 @@ export function useRealtimeSeats(
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [showId, onSeatUpdate, onReconnect, supabase]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showId, onSeatUpdate, onReconnect]);
 
   return { status };
 }

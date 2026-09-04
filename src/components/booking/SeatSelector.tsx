@@ -46,19 +46,22 @@ export function SeatSelector({ showId, initialSeats, userId }: SeatSelectorProps
   const handleSeatUpdate = useCallback((newSeat: any) => {
     if (newSeat) {
       setSeats((currentSeats) => {
+        // Use getState to avoid adding selectedSeatIds to useCallback dependencies
+        const currentSelected = useBookingStore.getState().selectedSeatIds;
         // If someone else took the seat we had selected, deselect it
-        if (newSeat.status !== 'AVAILABLE' && newSeat.held_by !== userId && selectedSeatIds.includes(newSeat.seat_id)) {
-          toggleSeatSelection(newSeat.seat_id, true); // true = force remove local selection
-          // Could optionally trigger a toast here
+        if (newSeat.status !== 'AVAILABLE' && newSeat.held_by !== userId && currentSelected.includes(newSeat.seat_id)) {
+          useBookingStore.getState().toggleSeatSelection(newSeat.seat_id, true); // true = force remove local selection
         }
         return currentSeats.map((seat) => (seat.show_seat_id === newSeat.id ? { ...seat, status: newSeat.status, held_by: newSeat.held_by } : seat));
       });
     }
-  }, [userId, selectedSeatIds, toggleSeatSelection]);
+  }, [userId]);
 
   const handleReconnect = useCallback(async () => {
+    // We use a fresh client for the REST call inside the hook to avoid recreating the callback
+    const localSupabase = createClient();
     // Re-fetch all seats to reconcile state
-    const { data } = await supabase
+    const { data } = await localSupabase
       .from('show_seats')
       .select('id, seat_id, status, held_by')
       .eq('show_id', showId);
