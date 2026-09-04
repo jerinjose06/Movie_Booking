@@ -6,7 +6,7 @@ import { TwoDSeatMap } from './TwoDSeatMap';
 import { useBookingStore } from '@/store/useBookingStore';
 import { useRealtimeSeats } from '@/hooks/useRealtimeSeats';
 import { type SeatData } from '@/utils/seatMapping';
-import { MonitorPlay, LayoutGrid, Wifi, WifiOff, Loader2 } from 'lucide-react';
+import { MonitorPlay, LayoutGrid, Wifi, WifiOff, Loader2, X, Map as MapIcon, Video, Users, Sun, Moon, ArrowLeft, Camera } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
 
 const TheatreScene = dynamic(
@@ -192,79 +192,85 @@ export function SeatSelector({ showId, initialSeats, userId }: SeatSelectorProps
 
       {viewMode === '3D' && (
         <div className="fixed inset-0 z-50 bg-black flex flex-col">
-          <div className="absolute top-4 left-0 w-full px-4 z-50">
-            <div className="flex gap-2 items-center bg-white/10 backdrop-blur-md p-2 rounded-xl overflow-x-auto whitespace-nowrap hide-scrollbar">
-            <button
-              onClick={() => setViewMode('2D')}
-              className="px-3 md:px-4 py-2 bg-white text-black font-semibold rounded-lg hover:bg-gray-200 transition-colors text-sm md:text-base shrink-0"
-            >
-              Exit 3D View
-            </button>
-            <button
-              onClick={() => {
-                setStoreViewMode('TOP_DOWN');
-                setViewingSeatId(null);
-              }}
-              className={`px-3 md:px-4 py-2 font-semibold rounded-lg transition-colors text-sm md:text-base shrink-0 ${storeViewMode === 'TOP_DOWN' ? 'bg-primary text-white' : 'bg-black/40 text-white hover:bg-black/60'}`}
-            >
-              Top View
-            </button>
-            <button
-              onClick={() => {
-                setStoreViewMode('SCREEN_VIEW');
-                setViewingSeatId(null);
-              }}
-              className={`px-3 md:px-4 py-2 font-semibold rounded-lg transition-colors text-sm md:text-base shrink-0 ${storeViewMode === 'SCREEN_VIEW' ? 'bg-primary text-white' : 'bg-black/40 text-white hover:bg-black/60'}`}
-            >
-              Screen View
-            </button>
-            <button
-              onClick={() => {
-                setStoreViewMode('ORBIT');
-                setViewingSeatId(null);
-              }}
-              className={`px-3 md:px-4 py-2 font-semibold rounded-lg transition-colors text-sm md:text-base shrink-0 ${storeViewMode === 'ORBIT' ? 'bg-primary text-white' : 'bg-black/40 text-white hover:bg-black/60'}`}
-            >
-              Free Cam
-            </button>
-            {storeViewMode === 'SEAT' && (
-              <button
-                onClick={() => {
-                  setStoreViewMode('TOP_DOWN');
-                  setViewingSeatId(null);
-                }}
-                className="px-3 md:px-4 py-2 bg-primary/20 text-primary border border-primary/50 font-semibold rounded-lg hover:bg-primary/40 transition-colors text-sm md:text-base shrink-0"
-              >
-                Exit Seat
-              </button>
-            )}
-            <div className="flex items-center gap-2 px-3 md:px-4 py-2 bg-black/40 rounded-lg text-white shrink-0">
-              <span className="text-sm font-medium">Show People</span>
-              <button
-                onClick={() => useBookingStore.getState().setShowAvatars(!showAvatars)}
-                className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-                  showAvatars ? 'bg-primary' : 'bg-gray-500'
-                }`}
-              >
-                <span className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
-                  showAvatars ? 'translate-x-5' : 'translate-x-1'
-                }`} />
-              </button>
+          <div className="absolute top-4 left-0 w-full px-2 md:px-4 z-50 flex flex-row items-start justify-between pointer-events-none">
+            
+            {/* Left Nav */}
+            <div className="flex flex-col gap-2">
+              <div className="flex gap-1.5 items-center bg-black/60 md:bg-white/10 backdrop-blur-md p-1.5 md:p-2 rounded-xl pointer-events-auto">
+                <button
+                  onClick={() => setViewMode('2D')}
+                  className="flex items-center justify-center p-2.5 md:px-4 md:py-2 bg-white text-black font-semibold rounded-lg hover:bg-gray-200 transition-colors shrink-0"
+                  aria-label="Exit 3D View"
+                >
+                  <ArrowLeft className="w-5 h-5 md:hidden" />
+                  <span className="hidden md:inline text-sm md:text-base">Exit 3D</span>
+                </button>
+
+                <div className="w-[1px] h-6 bg-white/20 mx-1"></div>
+
+                <button
+                  onClick={() => { setStoreViewMode('TOP_DOWN'); setViewingSeatId(null); }}
+                  className={`p-2.5 md:px-4 md:py-2 font-semibold rounded-lg transition-colors flex items-center gap-1.5 shrink-0 ${storeViewMode === 'TOP_DOWN' ? 'bg-primary text-white' : 'text-gray-300 hover:bg-white/10'}`}
+                  aria-label="Top View"
+                >
+                  <MapIcon className="w-5 h-5 md:hidden" />
+                  <span className="hidden md:inline text-sm md:text-base">Top</span>
+                </button>
+
+                <button
+                  onClick={() => { setStoreViewMode('SCREEN_VIEW'); setViewingSeatId(null); }}
+                  className={`p-2.5 md:px-4 md:py-2 font-semibold rounded-lg transition-colors flex items-center gap-1.5 shrink-0 ${storeViewMode === 'SCREEN_VIEW' ? 'bg-primary text-white' : 'text-gray-300 hover:bg-white/10'}`}
+                  aria-label="Screen View"
+                >
+                  <MonitorPlay className="w-5 h-5 md:hidden" />
+                  <span className="hidden md:inline text-sm md:text-base">Screen</span>
+                </button>
+
+                <button
+                  onClick={() => { setStoreViewMode('ORBIT'); setViewingSeatId(null); }}
+                  className={`p-2.5 md:px-4 md:py-2 font-semibold rounded-lg transition-colors flex items-center gap-1.5 shrink-0 ${storeViewMode === 'ORBIT' ? 'bg-primary text-white' : 'text-gray-300 hover:bg-white/10'}`}
+                  aria-label="Free Cam"
+                >
+                  <Video className="w-5 h-5 md:hidden" />
+                  <span className="hidden md:inline text-sm md:text-base">Free</span>
+                </button>
+              </div>
+
+              {storeViewMode === 'SEAT' && (
+                <div className="pointer-events-auto self-start mt-2">
+                  <button
+                    onClick={() => { setStoreViewMode('TOP_DOWN'); setViewingSeatId(null); }}
+                    className="p-3 md:px-4 md:py-2 bg-red-600/90 backdrop-blur-md text-white shadow-lg border border-red-500/50 font-semibold rounded-xl hover:bg-red-700 transition-colors flex items-center gap-2"
+                  >
+                    <X className="w-5 h-5" />
+                    <span className="text-sm">Exit Seat View</span>
+                  </button>
+                </div>
+              )}
             </div>
-            <div className="flex items-center gap-2 px-3 md:px-4 py-2 bg-black/40 rounded-lg text-white shrink-0">
-              <span className="text-sm font-medium">Light Mode</span>
-              <button
-                onClick={() => useBookingStore.getState().setLightMode(!lightMode)}
-                className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-                  lightMode ? 'bg-primary' : 'bg-gray-500'
-                }`}
-              >
-                <span className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
-                  lightMode ? 'translate-x-5' : 'translate-x-1'
-                }`} />
-              </button>
+
+            {/* Right Toggles */}
+            <div className="flex flex-col gap-2 items-end">
+              <div className="flex gap-1.5 items-center bg-black/60 md:bg-white/10 backdrop-blur-md p-1.5 md:p-2 rounded-xl pointer-events-auto">
+                <button
+                  onClick={() => useBookingStore.getState().setShowAvatars(!showAvatars)}
+                  className={`p-2.5 md:px-4 md:py-2 font-semibold rounded-lg transition-colors flex items-center gap-2 shrink-0 ${showAvatars ? 'bg-primary text-white' : 'text-gray-300 hover:bg-white/10'}`}
+                  aria-label="Toggle People"
+                >
+                  <Users className="w-5 h-5" />
+                  <span className="hidden md:inline text-sm">People</span>
+                </button>
+
+                <button
+                  onClick={() => useBookingStore.getState().setLightMode(!lightMode)}
+                  className={`p-2.5 md:px-4 md:py-2 font-semibold rounded-lg transition-colors flex items-center gap-2 shrink-0 ${lightMode ? 'bg-yellow-500 text-black' : 'text-gray-300 hover:bg-white/10'}`}
+                  aria-label="Toggle Light Mode"
+                >
+                  {lightMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                  <span className="hidden md:inline text-sm">Light</span>
+                </button>
+              </div>
             </div>
-          </div>
           </div>
           <div className="flex-1 w-full relative">
             <TheatreScene liveSeats={seats} onSeatClick={handleSeatClick} />
