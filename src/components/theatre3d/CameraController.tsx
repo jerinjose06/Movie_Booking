@@ -23,6 +23,8 @@ export function SeatCameraController({ seats, forcedSeatId }: SeatCameraControll
   const isSeatView = viewMode === 'SEAT';
   const [gyroActive, setGyroActive] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [gyroOffset, setGyroOffset] = useState<number>(0);
+  const offsetComputed = useRef(false);
 
   // First-person mouse drag look state
   const isDragging = useRef(false);
@@ -39,6 +41,47 @@ export function SeatCameraController({ seats, forcedSeatId }: SeatCameraControll
   const targetPos = useRef(new THREE.Vector3());
   const targetLook = useRef(new THREE.Vector3());
   const transitionActive = useRef(false);
+
+  // Calibrate gyroscope so the user always faces the screen initially, regardless of physical compass direction
+  useEffect(() => {
+    if (isSeatView && isMobile) {
+      offsetComputed.current = false;
+
+      const handleOrientation = (event: DeviceOrientationEvent) => {
+        // Some devices might return null if they lack a magnetometer, but if it has one, we calibrate
+        if (event.alpha !== null && !offsetComputed.current) {
+          offsetComputed.current = true;
+          const alphaRad = THREE.MathUtils.degToRad(event.alpha);
+          
+          let baseYaw = 0;
+          const seat = seats.find(s => s.id === activeSeatId);
+          if (seat) {
+            const screenTarget = new THREE.Vector3(0, 6.5, -8.0);
+            const camPos = new THREE.Vector3(...seat.cameraPosition);
+            const baseDir = screenTarget.clone().sub(camPos).normalize();
+            // Calculate the angle needed to look directly at the screen from this specific seat
+            baseYaw = Math.atan2(baseDir.x, -baseDir.z); 
+          }
+
+          // Offset the physical compass heading by our target virtual heading
+          setGyroOffset(baseYaw - alphaRad);
+          window.removeEventListener('deviceorientation', handleOrientation);
+        }
+      };
+
+      window.addEventListener('deviceorientation', handleOrientation);
+
+      // Fallback: If no event fires within 1 second, we just leave offset as 0
+      const fallbackTimer = setTimeout(() => {
+        window.removeEventListener('deviceorientation', handleOrientation);
+      }, 1000);
+
+      return () => {
+        window.removeEventListener('deviceorientation', handleOrientation);
+        clearTimeout(fallbackTimer);
+      };
+    }
+  }, [isSeatView, isMobile, activeSeatId, seats]);
 
   // Reset look angles when seat changes or view changes
   useEffect(() => {
@@ -161,12 +204,11 @@ export function SeatCameraController({ seats, forcedSeatId }: SeatCameraControll
         }
       }
 
-      // Spatial clamp to prevent the camera from going through the screen or walls
+      // Spatial clamp and dynamic floor collision
       if (controlsRef.current && !transitionActive.current) {
         let clamped = false;
         
         // Prevent going behind the screen (screen is at z = -8, wall is at -10)
-        // Set a strict invisible wall just in front of the screen
         if (camera.position.z < -6) {
           camera.position.z = -6;
           clamped = true;
@@ -192,12 +234,36 @@ export function SeatCameraController({ seats, forcedSeatId }: SeatCameraControll
         if (clamped) {
           camera.lookAt(controlsRef.current.target);
         }
+
+        // --- NEW: Prevent camera from going under the seats ---
+        // The seating profile slopes up towards the back: roughly y = max(0, z * 0.357)
+        // We enforce a dynamic maxPolarAngle on OrbitControls to prevent dipping below this slope
+        const z = camera.position.z;
+        const floorHeight = Math.max(0.5, z * 0.357);
+        const minCameraY = floorHeight + 1.2; // Stay at least 1.2m above floor/seats
+        
+        const targetY = controlsRef.current.target.y;
+        const dy = minCameraY - targetY;
+        
+        if (dy > 0) {
+          const dx = camera.position.x - controlsRef.current.target.x;
+          const dz = camera.position.z - controlsRef.current.target.z;
+          const distHorizontal = Math.sqrt(dx*dx + dz*dz);
+          
+          if (distHorizontal > 0.1) {
+            const maxAngle = Math.atan2(distHorizontal, dy);
+            controlsRef.current.maxPolarAngle = Math.min(Math.PI / 2 - 0.05, maxAngle);
+          }
+        } else {
+          // If target is high enough, default clamp to just above flat floor
+          controlsRef.current.maxPolarAngle = Math.PI / 2 - 0.05;
+        }
       }
     }
   });
 
   if (isSeatView && isMobile && gyroActive) {
-    return <DeviceOrientationControls makeDefault alphaOffset={Math.PI} />;
+    return <DeviceOrientationControls makeDefault alphaOffset={gyroOffset} />;
   }
 
   // When not in seated first-person view, use standard OrbitControls
