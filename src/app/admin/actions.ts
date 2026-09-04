@@ -260,124 +260,133 @@ export async function createShow(formData: FormData) {
 
 
 export async function updateScreenConfig(auditoriumId: string, name: string, rows: number, columnsPerSection: number[]) {
-  const { isAuthorized } = await checkAdmin();
-  if (!isAuthorized) throw new Error("Unauthorized");
+  try {
+    const { isAuthorized } = await checkAdmin();
+    if (!isAuthorized) return { error: "Unauthorized" };
 
-  const adminClient = createAdminClient();
+    const adminClient = createAdminClient();
 
-  // 1. Update Auditorium Name
-  const { error: audError } = await adminClient
-    .from('auditoriums')
-    .update({ name })
-    .eq('id', auditoriumId);
+    // 1. Update Auditorium Name
+    const { error: audError } = await adminClient
+      .from('auditoriums')
+      .update({ name })
+      .eq('id', auditoriumId);
 
-  if (audError) throw new Error(audError.message);
+    if (audError) return { error: audError.message };
 
-  // 2. Clear existing seats and rows
-  // Fetch row IDs first to delete seats (due to foreign key constraint)
-  const { data: rowsToDelete } = await adminClient
-    .from('seat_rows')
-    .select('id')
-    .eq('auditorium_id', auditoriumId);
-
-  if (rowsToDelete && rowsToDelete.length > 0) {
-    const rowIds = rowsToDelete.map(r => r.id);
-    const { error: seatsDeleteErr } = await adminClient
-      .from('seats')
-      .delete()
-      .in('row_id', rowIds);
-    if (seatsDeleteErr) throw new Error(seatsDeleteErr.message);
-
-    const { error: rowsDeleteErr } = await adminClient
-      .from('seat_rows')
-      .delete()
-      .eq('auditorium_id', auditoriumId);
-    if (rowsDeleteErr) throw new Error(rowsDeleteErr.message);
-  }
-
-  // 3. Generate New Seating Layout
-  const SEAT_TYPE_STANDARD = 1;
-  const SEAT_SPACING_X = 1.2;
-  const SEAT_SPACING_Z = 1.5;
-  const AISLE_WIDTH = 2.0;
-  const ROW_ELEVATION = 0.35;
-
-  const totalSeatsInRow = columnsPerSection.reduce((a, b) => a + b, 0);
-  const numAisles = columnsPerSection.length - 1;
-  const totalWidth = (totalSeatsInRow - 1) * SEAT_SPACING_X + numAisles * AISLE_WIDTH;
-  const startX = -totalWidth / 2;
-
-  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-
-  for (let r = 0; r < rows; r++) {
-    const rowName = alphabet[r % alphabet.length] + (r >= 26 ? Math.floor(r / 26) : '');
-    
-    const { data: rowRecord, error: rowError } = await adminClient.from('seat_rows').insert({
-      auditorium_id: auditoriumId,
-      row_name: rowName
-    }).select().single();
-    if (rowError) throw new Error(rowError.message);
-
-    let currentX = startX;
-    let seatNumber = 1;
-    const seatsToInsert = [];
-
-    const zPos = r * SEAT_SPACING_Z;
-    const yPos = r * ROW_ELEVATION;
-
-    for (let s = 0; s < columnsPerSection.length; s++) {
-      const cols = columnsPerSection[s];
-      for (let c = 0; c < cols; c++) {
-        seatsToInsert.push({
-          row_id: rowRecord.id,
-          seat_number: seatNumber,
-          seat_type_id: SEAT_TYPE_STANDARD,
-          pos_x: currentX,
-          pos_y: yPos,
-          pos_z: zPos
-        });
-        currentX += SEAT_SPACING_X;
-        seatNumber++;
-      }
-      if (s < columnsPerSection.length - 1) {
-        currentX -= SEAT_SPACING_X;
-        currentX += AISLE_WIDTH;
-      }
+    // 1.5. Clear show_seats for all shows in this auditorium (FK constraint before deleting seats)
+    const { data: shows } = await adminClient.from('shows').select('id').eq('auditorium_id', auditoriumId);
+    if (shows && shows.length > 0) {
+      const showIds = shows.map(s => s.id);
+      const { error: ssDeleteErr } = await adminClient.from('show_seats').delete().in('show_id', showIds);
+      if (ssDeleteErr) return { error: ssDeleteErr.message };
     }
 
-    const { error: seatsError } = await adminClient.from('seats').insert(seatsToInsert);
-    if (seatsError) throw new Error(seatsError.message);
-  }
+    // 2. Clear existing seats and rows
+    // Fetch row IDs first to delete seats (due to foreign key constraint)
+    const { data: rowsToDelete } = await adminClient
+      .from('seat_rows')
+      .select('id')
+      .eq('auditorium_id', auditoriumId);
 
-  // Also update active shows to recreate show_seats if needed
-  const { data: shows } = await adminClient.from('shows').select('id').eq('auditorium_id', auditoriumId);
-  if (shows && shows.length > 0) {
-    const { data: allSeatRows } = await adminClient.from('seat_rows').select('id, seats(id)').eq('auditorium_id', auditoriumId);
-    if (allSeatRows) {
-      for (const show of shows) {
-        // Clear old show seats
-        await adminClient.from('show_seats').delete().eq('show_id', show.id);
+    if (rowsToDelete && rowsToDelete.length > 0) {
+      const rowIds = rowsToDelete.map(r => r.id);
+      const { error: seatsDeleteErr } = await adminClient
+        .from('seats')
+        .delete()
+        .in('row_id', rowIds);
+      if (seatsDeleteErr) return { error: seatsDeleteErr.message };
 
-        // Add new show seats
-        const showSeats = [];
-        for (const row of allSeatRows) {
-          for (const seat of row.seats) {
-            showSeats.push({
-              show_id: show.id,
-              seat_id: seat.id,
-              status: 'AVAILABLE'
-            });
+      const { error: rowsDeleteErr } = await adminClient
+        .from('seat_rows')
+        .delete()
+        .eq('auditorium_id', auditoriumId);
+      if (rowsDeleteErr) return { error: rowsDeleteErr.message };
+    }
+
+    // 3. Generate New Seating Layout
+    const SEAT_TYPE_STANDARD = 1;
+    const SEAT_SPACING_X = 1.2;
+    const SEAT_SPACING_Z = 1.5;
+    const AISLE_WIDTH = 2.0;
+    const ROW_ELEVATION = 0.35;
+
+    const totalSeatsInRow = columnsPerSection.reduce((a, b) => a + b, 0);
+    const numAisles = columnsPerSection.length - 1;
+    const totalWidth = (totalSeatsInRow - 1) * SEAT_SPACING_X + numAisles * AISLE_WIDTH;
+    const startX = -totalWidth / 2;
+
+    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+    for (let r = 0; r < rows; r++) {
+      const rowName = alphabet[r % alphabet.length] + (r >= 26 ? Math.floor(r / 26) : '');
+      
+      const { data: rowRecord, error: rowError } = await adminClient.from('seat_rows').insert({
+        auditorium_id: auditoriumId,
+        row_name: rowName
+      }).select().single();
+      if (rowError) return { error: rowError.message };
+
+      let currentX = startX;
+      let seatNumber = 1;
+      const seatsToInsert = [];
+
+      const zPos = r * SEAT_SPACING_Z;
+      const yPos = r * ROW_ELEVATION;
+
+      for (let s = 0; s < columnsPerSection.length; s++) {
+        const cols = columnsPerSection[s];
+        for (let c = 0; c < cols; c++) {
+          seatsToInsert.push({
+            row_id: rowRecord.id,
+            seat_number: seatNumber,
+            seat_type_id: SEAT_TYPE_STANDARD,
+            pos_x: currentX,
+            pos_y: yPos,
+            pos_z: zPos
+          });
+          currentX += SEAT_SPACING_X;
+          seatNumber++;
+        }
+        if (s < columnsPerSection.length - 1) {
+          currentX -= SEAT_SPACING_X;
+          currentX += AISLE_WIDTH;
+        }
+      }
+
+      const { error: seatsError } = await adminClient.from('seats').insert(seatsToInsert);
+      if (seatsError) return { error: seatsError.message };
+    }
+
+    // Also update active shows to recreate show_seats if needed
+    if (shows && shows.length > 0) {
+      const { data: allSeatRows } = await adminClient.from('seat_rows').select('id, seats(id)').eq('auditorium_id', auditoriumId);
+      if (allSeatRows) {
+        for (const show of shows) {
+          // Add new show seats
+          const showSeats = [];
+          for (const row of allSeatRows) {
+            for (const seat of row.seats) {
+              showSeats.push({
+                show_id: show.id,
+                seat_id: seat.id,
+                status: 'AVAILABLE'
+              });
+            }
+          }
+          if (showSeats.length > 0) {
+            await adminClient.from('show_seats').insert(showSeats);
           }
         }
-        if (showSeats.length > 0) {
-          await adminClient.from('show_seats').insert(showSeats);
-        }
       }
     }
-  }
 
-  revalidatePath('/admin/auditoriums/' + auditoriumId);
-  return { success: true };
+    revalidatePath('/admin/auditoriums/' + auditoriumId);
+    return { success: true };
+  } catch (err: any) {
+    console.error("updateScreenConfig Action Error:", err);
+    return { error: err.message || "An unexpected error occurred" };
+  }
 }
 export async function updateMovie(movieId: string, formData: FormData) {
   try {

@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -39,7 +39,11 @@ export function ScreenConfigForm({
         throw new Error(`You selected ${sections} sections, but provided ${cols.length} column values.`);
       }
 
-      await updateScreenConfig(auditoriumId, name, rows, cols);
+      const result = await updateScreenConfig(auditoriumId, name, rows, cols);
+      if (result.error) {
+        throw new Error(result.error);
+      }
+      
       alert("Configuration saved successfully!");
       router.refresh();
     } catch (err: any) {
