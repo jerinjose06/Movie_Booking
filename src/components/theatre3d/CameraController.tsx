@@ -21,7 +21,6 @@ export function SeatCameraController({ seats, forcedSeatId }: SeatCameraControll
 
   const activeSeatId = forcedSeatId || viewingSeatId;
   const isSeatView = viewMode === 'SEAT';
-  const isTransitioning = useRef(false);
   const [gyroActive, setGyroActive] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -37,21 +36,36 @@ export function SeatCameraController({ seats, forcedSeatId }: SeatCameraControll
     setIsMobile(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
   }, []);
 
+  const targetPos = useRef(new THREE.Vector3());
+  const targetLook = useRef(new THREE.Vector3());
+  const transitionActive = useRef(false);
+
   // Reset look angles when seat changes or view changes
   useEffect(() => {
-    isTransitioning.current = true;
+    transitionActive.current = true;
     setGyroActive(false);
     targetYaw.current = 0;
     targetPitch.current = 0;
     currentYaw.current = 0;
     currentPitch.current = 0;
 
+    if (viewMode === 'TOP_DOWN') {
+      targetPos.current.set(0, 28, 12);
+      targetLook.current.set(0, 0, 8);
+    } else if (viewMode === 'SCREEN_VIEW') {
+      targetPos.current.set(0, 5.5, -4.5);
+      targetLook.current.set(0, 4, 12);
+    } else if (viewMode === 'ORBIT') {
+      targetPos.current.set(0, 16, 26);
+      targetLook.current.set(0, 3, 6);
+    }
+
     const timer = setTimeout(() => {
-      isTransitioning.current = false;
+      transitionActive.current = false;
       if (isSeatView && isMobile) {
         setGyroActive(true);
       }
-    }, 800);
+    }, 400); // reduced delay for snappier transition
 
     return () => clearTimeout(timer);
   }, [viewMode, activeSeatId, isSeatView, isMobile]);
@@ -106,14 +120,14 @@ export function SeatCameraController({ seats, forcedSeatId }: SeatCameraControll
     if (isSeatView && activeSeatId) {
       const seat = seats.find(s => s.id === activeSeatId);
       if (seat) {
-        // Move camera position smoothly to seat eye height
-        easing.damp3(camera.position, seat.cameraPosition, 0.35, delta);
+        // Snappier transition to seat eye height
+        easing.damp3(camera.position, seat.cameraPosition, 0.15, delta);
 
         // Only use drag-to-look on desktop or if gyro isn't active
         if (!isMobile || !gyroActive) {
-          // Smoothly interpolate look-around rotation
-          currentYaw.current = THREE.MathUtils.lerp(currentYaw.current, targetYaw.current, Math.min(1, delta * 12));
-          currentPitch.current = THREE.MathUtils.lerp(currentPitch.current, targetPitch.current, Math.min(1, delta * 12));
+          // Snappier interpolation for look-around
+          currentYaw.current = THREE.MathUtils.lerp(currentYaw.current, targetYaw.current, Math.min(1, delta * 20));
+          currentPitch.current = THREE.MathUtils.lerp(currentPitch.current, targetPitch.current, Math.min(1, delta * 20));
 
           // Base vector pointing towards center of the screen
           const screenTarget = new THREE.Vector3(0, 6.5, -8.0);
@@ -138,22 +152,45 @@ export function SeatCameraController({ seats, forcedSeatId }: SeatCameraControll
           camera.lookAt(lookAtPos);
         }
       }
-    } else if (viewMode === 'TOP_DOWN') {
-      easing.damp3(camera.position, [0, 28, 12], 0.6, delta);
-      if (controlsRef.current) {
-        controlsRef.current.target.set(0, 0, 8);
-      }
-    } else if (viewMode === 'SCREEN_VIEW') {
-      easing.damp3(camera.position, [0, 5.5, -6.5], 0.6, delta);
-      if (controlsRef.current) {
-        controlsRef.current.target.set(0, 4, 12);
-      }
     } else {
-      // Default ORBIT / Free Cam
-      if (isTransitioning.current) {
-        easing.damp3(camera.position, [0, 16, 26], 0.6, delta);
+      // For TOP_DOWN, SCREEN_VIEW, and FREE
+      if (transitionActive.current) {
+        easing.damp3(camera.position, targetPos.current, 0.25, delta);
         if (controlsRef.current) {
-          controlsRef.current.target.set(0, 3, 6);
+          easing.damp3(controlsRef.current.target, targetLook.current, 0.25, delta);
+        }
+      }
+
+      // Spatial clamp to prevent the camera from going through the screen or walls
+      if (controlsRef.current && !transitionActive.current) {
+        let clamped = false;
+        
+        // Prevent going behind the screen (screen is at z = -8, wall is at -10)
+        // Set a strict invisible wall just in front of the screen
+        if (camera.position.z < -6) {
+          camera.position.z = -6;
+          clamped = true;
+        }
+        
+        // Prevent going outside the side walls (wallX is around 25)
+        if (camera.position.x < -23) {
+          camera.position.x = -23;
+          clamped = true;
+        }
+        if (camera.position.x > 23) {
+          camera.position.x = 23;
+          clamped = true;
+        }
+
+        // Prevent going through the back wall (backZ is around 35)
+        if (camera.position.z > 33) {
+          camera.position.z = 33;
+          clamped = true;
+        }
+
+        // Reorient camera if we pushed it to prevent jerky visual glitches
+        if (clamped) {
+          camera.lookAt(controlsRef.current.target);
         }
       }
     }
@@ -169,13 +206,13 @@ export function SeatCameraController({ seats, forcedSeatId }: SeatCameraControll
       <OrbitControls
         ref={controlsRef}
         makeDefault
-        minDistance={2}
-        maxDistance={55}
+        minDistance={3}
+        maxDistance={45}
         minPolarAngle={0}
-        maxPolarAngle={Math.PI / 2}
+        maxPolarAngle={Math.PI / 2 - 0.05} // Prevent clipping through the floor
         enableDamping
         dampingFactor={0.06}
-        enablePan={true}
+        enablePan={false}
         enableZoom={true}
       />
     );

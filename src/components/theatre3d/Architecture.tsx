@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react';
 import * as THREE from 'three';
+import { useBookingStore } from '@/store/useBookingStore';
 
 interface ArchitectureProps {
   theatreWidth?: number;
@@ -20,8 +21,17 @@ export function Architecture({
   floorMidY = 3.0,
   floorMidZ = 10
 }: ArchitectureProps) {
-  const floorMaterial = useMemo(() => new THREE.MeshStandardMaterial({ color: '#11151c', roughness: 0.9 }), []);
-  const wallMaterial = useMemo(() => new THREE.MeshStandardMaterial({ color: '#0f172a', roughness: 0.8 }), []);
+  const { lightMode } = useBookingStore();
+
+  const floorMaterial = useMemo(() => new THREE.MeshStandardMaterial({ 
+    color: lightMode ? '#cbd5e1' : '#11151c', 
+    roughness: 0.9 
+  }), [lightMode]);
+  
+  const wallMaterial = useMemo(() => new THREE.MeshStandardMaterial({ 
+    color: lightMode ? '#e2e8f0' : '#0f172a', 
+    roughness: 0.8 
+  }), [lightMode]);
   
   // The classic blue glowing cinema screen material
   const screenMaterial = useMemo(() => new THREE.MeshStandardMaterial({ 
@@ -32,10 +42,10 @@ export function Architecture({
   }), []);
 
   const stripMaterial = useMemo(() => new THREE.MeshStandardMaterial({ 
-    color: '#38bdf8', 
-    emissive: '#38bdf8',
-    emissiveIntensity: 2
-  }), []);
+    color: lightMode ? '#94a3b8' : '#38bdf8', 
+    emissive: lightMode ? '#94a3b8' : '#38bdf8',
+    emissiveIntensity: lightMode ? 0 : 2
+  }), [lightMode]);
 
   const screenWidth = Math.max(20, Math.min(32, theatreWidth - 10));
   const screenHeight = screenWidth * (10 / 24);
