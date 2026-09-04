@@ -109,31 +109,34 @@ export function SeatCameraController({ seats, forcedSeatId }: SeatCameraControll
         // Move camera position smoothly to seat eye height
         easing.damp3(camera.position, seat.cameraPosition, 0.35, delta);
 
-        // Smoothly interpolate look-around rotation
-        currentYaw.current = THREE.MathUtils.lerp(currentYaw.current, targetYaw.current, Math.min(1, delta * 12));
-        currentPitch.current = THREE.MathUtils.lerp(currentPitch.current, targetPitch.current, Math.min(1, delta * 12));
+        // Only use drag-to-look on desktop or if gyro isn't active
+        if (!isMobile || !gyroActive) {
+          // Smoothly interpolate look-around rotation
+          currentYaw.current = THREE.MathUtils.lerp(currentYaw.current, targetYaw.current, Math.min(1, delta * 12));
+          currentPitch.current = THREE.MathUtils.lerp(currentPitch.current, targetPitch.current, Math.min(1, delta * 12));
 
-        // Base vector pointing towards center of the screen
-        const screenTarget = new THREE.Vector3(0, 6.5, -8.0);
-        const camPos = new THREE.Vector3(...seat.cameraPosition);
-        const baseDir = screenTarget.clone().sub(camPos).normalize();
+          // Base vector pointing towards center of the screen
+          const screenTarget = new THREE.Vector3(0, 6.5, -8.0);
+          const camPos = new THREE.Vector3(...seat.cameraPosition);
+          const baseDir = screenTarget.clone().sub(camPos).normalize();
 
-        // Calculate base angles
-        const baseYaw = Math.atan2(baseDir.x, -baseDir.z);
-        const basePitch = Math.asin(baseDir.y);
+          // Calculate base angles
+          const baseYaw = Math.atan2(baseDir.x, -baseDir.z);
+          const basePitch = Math.asin(baseDir.y);
 
-        const totalYaw = baseYaw + currentYaw.current;
-        const totalPitch = basePitch + currentPitch.current;
+          const totalYaw = baseYaw + currentYaw.current;
+          const totalPitch = basePitch + currentPitch.current;
 
-        // Compute forward look direction
-        const lookDir = new THREE.Vector3(
-          Math.sin(totalYaw) * Math.cos(totalPitch),
-          Math.sin(totalPitch),
-          -Math.cos(totalYaw) * Math.cos(totalPitch)
-        ).normalize();
+          // Compute forward look direction
+          const lookDir = new THREE.Vector3(
+            Math.sin(totalYaw) * Math.cos(totalPitch),
+            Math.sin(totalPitch),
+            -Math.cos(totalYaw) * Math.cos(totalPitch)
+          ).normalize();
 
-        const lookAtPos = camera.position.clone().add(lookDir);
-        camera.lookAt(lookAtPos);
+          const lookAtPos = camera.position.clone().add(lookDir);
+          camera.lookAt(lookAtPos);
+        }
       }
     } else if (viewMode === 'TOP_DOWN') {
       easing.damp3(camera.position, [0, 28, 12], 0.6, delta);
