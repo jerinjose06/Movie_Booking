@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { Play, ArrowLeft } from 'lucide-react';
 import Image from 'next/image';
+import { MovieShows } from './MovieShows';
 
 export default async function MovieDetails({ params }: { params: { movieId: string } }) {
   const { movieId } = await params;
@@ -23,6 +24,7 @@ export default async function MovieDetails({ params }: { params: { movieId: stri
       )
     `)
     .eq('id', movieId)
+    .gte('shows.start_time', new Date().toISOString())
     .single();
 
   if (!movie) notFound();
@@ -99,29 +101,7 @@ export default async function MovieDetails({ params }: { params: { movieId: stri
         {/* Shows Section / Booking Button */}
         <div>
           <h2 className="text-2xl font-serif font-bold mb-6 text-white">Available Shows</h2>
-          {movie.shows && movie.shows.length > 0 ? (
-            <div className="flex flex-wrap gap-4">
-              {movie.shows.map((show: any) => (
-                <Link
-                  key={show.id}
-                  href={`/booking/${show.id}`}
-                  className="bg-gray-800 hover:bg-gray-700 border border-gray-700 hover:border-red-500 px-6 py-4 rounded-xl transition-all shadow-sm flex flex-col items-start gap-1 group"
-                >
-                  <span className="font-bold text-white group-hover:text-red-400 transition-colors">
-                    {new Date(show.start_time).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
-                  </span>
-                  <span className="text-sm text-gray-400">
-                    {new Date(show.start_time).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
-                  </span>
-                  <span className="text-xs text-gray-500 mt-2">
-                    {show.auditoriums?.theatres?.name} • {show.auditoriums?.name}
-                  </span>
-                </Link>
-              ))}
-            </div>
-          ) : (
-            <p className="text-gray-500 italic">No shows scheduled yet.</p>
-          )}
+          <MovieShows shows={movie.shows} />
         </div>
       </div>
     </div>

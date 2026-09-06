@@ -7,6 +7,7 @@ import { useBookingStore } from '@/store/useBookingStore';
 import { createClient } from '@/utils/supabase/client';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import toast from 'react-hot-toast';
 
 export function BookingClient({ show, initialSeats, userProfile }: any) {
   const [isHolding, setIsHolding] = useState(false);
@@ -65,7 +66,7 @@ export function BookingClient({ show, initialSeats, userProfile }: any) {
       startTimer();
       router.push(`/checkout/${booking.id}`);
     } catch (error: any) {
-      alert(`Could not hold seats: ${error.message}`);
+      toast.error(`Could not hold seats: ${error.message}`);
       setIsHolding(false);
     }
   };

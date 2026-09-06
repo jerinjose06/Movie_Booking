@@ -8,6 +8,7 @@ import { useRealtimeSeats } from '@/hooks/useRealtimeSeats';
 import { type SeatData } from '@/utils/seatMapping';
 import { MonitorPlay, LayoutGrid, Wifi, WifiOff, Loader2, X, Map as MapIcon, Video, Users, Sun, Moon, ArrowLeft, Camera } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
+import toast from 'react-hot-toast';
 
 const TheatreScene = dynamic(
   () => import('../theatre3d/TheatreScene').then((mod) => mod.TheatreScene),
@@ -87,7 +88,7 @@ export function SeatSelector({ showId, initialSeats, userId }: SeatSelectorProps
     
     // Check if it's already held by someone else
     if (seat.status !== 'AVAILABLE' && seat.held_by !== userId) {
-      alert("This seat is currently unavailable.");
+      toast("This seat is currently unavailable.");
       return;
     }
 
@@ -95,7 +96,7 @@ export function SeatSelector({ showId, initialSeats, userId }: SeatSelectorProps
     const willHold = !isCurrentlySelected;
 
     if (willHold && selectedSeatIds.length >= 8) {
-      alert("You can only select up to 8 seats.");
+      toast("You can only select up to 8 seats.");
       return;
     }
     
@@ -113,7 +114,7 @@ export function SeatSelector({ showId, initialSeats, userId }: SeatSelectorProps
     if (error) {
       // Revert optimistic update
       toggleSeatSelection(seatId, true); // Force remove
-      alert(error.message || "Could not reserve seat.");
+      toast.error(error.message || "Could not reserve seat.");
     }
   };
 

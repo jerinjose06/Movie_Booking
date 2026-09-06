@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import toast from 'react-hot-toast';
 
 interface BookingState {
   selectedSeatIds: number[];
@@ -47,7 +48,7 @@ export const useBookingStore = create<BookingState>((set, get) => ({
     const current = get().compareSeatIds;
     if (current.includes(seatId)) return;
     if (current.length >= 3) {
-      alert("You can only compare up to 3 seats at a time.");
+      toast("You can only compare up to 3 seats at a time.");
       return;
     }
     set({ compareSeatIds: [...current, seatId], isComparing: true });

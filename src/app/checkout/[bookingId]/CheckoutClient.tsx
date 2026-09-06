@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useBookingStore } from '@/store/useBookingStore';
+import toast from 'react-hot-toast';
 
 export function CheckoutClient({ booking }: { booking: any }) {
   const [isProcessing, setIsProcessing] = useState(false);
@@ -35,7 +36,7 @@ export function CheckoutClient({ booking }: { booking: any }) {
         window.location.href = data.url;
       }
     } catch (error: any) {
-      alert(`Payment setup failed: ${error.message}`);
+      toast.error(`Payment setup failed: ${error.message}`);
       setIsProcessing(false);
     }
   };

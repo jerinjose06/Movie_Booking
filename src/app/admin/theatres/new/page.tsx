@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createTheatre } from '../../actions';
+import toast from 'react-hot-toast';
 
 export default function NewTheatrePage() {
   const [loading, setLoading] = useState(false);
@@ -17,7 +18,7 @@ export default function NewTheatrePage() {
       const res = await createTheatre(formData);
       router.push('/admin/theatres/' + res.theatreId);
     } catch (err: any) {
-      alert("Error: " + err.message);
+      toast.error(err.message);
       setLoading(false);
     }
   };

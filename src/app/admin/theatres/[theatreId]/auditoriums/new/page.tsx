@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createAuditoriumLayout } from '../../../../actions';
+import toast from 'react-hot-toast';
 
 export default function NewAuditoriumPage({ params }: { params: Promise<{ theatreId: string }> }) {
   const { theatreId } = React.use(params);
@@ -28,7 +29,7 @@ export default function NewAuditoriumPage({ params }: { params: Promise<{ theatr
       await createAuditoriumLayout(theatreId, name, rows, cols);
       router.push('/admin/theatres/' + theatreId);
     } catch (err: any) {
-      alert("Error: " + err.message);
+      toast.error(err.message);
       setLoading(false);
     }
   };

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { updateScreenConfig } from '../../actions';
+import toast from 'react-hot-toast';
 
 interface ScreenConfigFormProps {
   auditoriumId: string;
@@ -44,10 +45,10 @@ export function ScreenConfigForm({
         throw new Error(result.error);
       }
       
-      alert("Configuration saved successfully!");
+      toast.success("Configuration saved successfully!");
       router.refresh();
     } catch (err: any) {
-      alert("Error: " + err.message);
+      toast.error(err.message);
     } finally {
       setLoading(false);
     }

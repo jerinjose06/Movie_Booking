@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { updateMovie } from '../../../actions';
 
 import { CustomSelect } from '@/components/admin/CustomSelect';
+import toast from 'react-hot-toast';
 
 interface EditMovieFormProps {
   movie: any;
@@ -21,13 +22,13 @@ export function EditMovieForm({ movie }: EditMovieFormProps) {
       const formData = new FormData(e.currentTarget);
       const res = await updateMovie(movie.id, formData);
       if (res && res.error) {
-        alert("Error: " + res.error);
+        toast.error(res.error);
         setLoading(false);
       } else {
         router.push('/admin/movies');
       }
     } catch (err: any) {
-      alert("Error: " + err.message);
+      toast.error(err.message);
       setLoading(false);
     }
   };

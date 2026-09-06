@@ -1,6 +1,7 @@
 import { createClient } from '@/utils/supabase/server';
 import Link from 'next/link';
 import { Calendar, MapPin } from 'lucide-react';
+import { CancelShowButton } from './CancelShowButton';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -35,14 +36,13 @@ export default async function ShowsPage() {
               <MapPin className="w-3 h-3 text-gray-500" />
               {show.auditoriums?.theatres?.name} - {show.auditoriums?.name}
             </div>
-            <div className="flex items-center justify-between text-xs text-gray-400 border-t border-gray-800/50 pt-3">
+            <div className="flex items-center text-xs text-gray-400 border-t border-gray-800/50 pt-3">
               <div className="flex items-center gap-1.5">
                 <Calendar className="w-3 h-3 text-gray-500" />
-                <span>{new Date(show.start_time).toLocaleDateString()}</span>
-                <span className="text-gray-600">•</span>
-                <span>{new Date(show.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                <span className="font-medium text-gray-300">{new Date(show.start_time).toLocaleDateString()}</span>
+                <span className="text-gray-600 px-1">•</span>
+                <span className="font-medium text-gray-300">{new Date(show.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}</span>
               </div>
-              <span className="text-gray-500">→ {new Date(show.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
             </div>
           </div>
         ))}
@@ -59,8 +59,8 @@ export default async function ShowsPage() {
               <tr>
                 <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Movie</th>
                 <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Theatre & Screen</th>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Start Time</th>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">End Time</th>
+                <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Date</th>
+                <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Time</th>
                 <th className="px-6 py-3.5 text-right text-xs font-semibold text-gray-400 uppercase tracking-wider">Bookings</th>
               </tr>
             </thead>
@@ -71,12 +71,15 @@ export default async function ShowsPage() {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                     {show.auditoriums?.theatres?.name} - {show.auditoriums?.name}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{new Date(show.start_time).toLocaleString()}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{new Date(show.end_time).toLocaleString()}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{new Date(show.start_time).toLocaleDateString()}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{new Date(show.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <Link href={`/admin/shows/${show.id}/bookings`} className="text-red-500 hover:text-red-400 font-medium">
-                      View
-                    </Link>
+                    <div className="flex justify-end items-center gap-4">
+                      <CancelShowButton showId={show.id} />
+                      <Link href={`/admin/shows/${show.id}/bookings`} className="text-red-500 hover:text-red-400 font-medium">
+                        View
+                      </Link>
+                    </div>
                   </td>
                 </tr>
               ))}

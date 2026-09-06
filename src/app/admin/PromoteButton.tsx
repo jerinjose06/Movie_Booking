@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { promoteToAdmin } from './actions';
 import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 
 export function PromoteButton() {
   const [loading, setLoading] = useState(false);
@@ -14,7 +15,7 @@ export function PromoteButton() {
       await promoteToAdmin();
       router.refresh();
     } catch (err) {
-      alert("Failed to promote: " + err);
+      toast.error("Failed to promote: " + err);
       setLoading(false);
     }
   };

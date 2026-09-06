@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { changeAdminPassword } from '../actions';
+import toast from 'react-hot-toast';
 
 export default function SettingsPage() {
   const [loading, setLoading] = useState(false);
@@ -13,11 +14,11 @@ export default function SettingsPage() {
       const formData = new FormData(e.currentTarget);
       const res = await changeAdminPassword(formData);
       if (res.success) {
-        alert("Password updated successfully!");
+        toast.success("Password updated successfully!");
         (e.target as HTMLFormElement).reset();
       }
     } catch (err: any) {
-      alert("Error: " + err.message);
+      toast.error(err.message);
     } finally {
       setLoading(false);
     }

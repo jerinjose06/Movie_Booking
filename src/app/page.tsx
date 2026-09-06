@@ -18,7 +18,10 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ s
   const { data: profile } = await supabase.from('profiles').select('full_name').eq('id', user.id).single();
 
   const { search, category } = await searchParams;
-  let query = supabase.from('movies').select('*').order('created_at', { ascending: false });
+  let query = supabase
+    .from('movies')
+    .select('*, shows(start_time)')
+    .order('created_at', { ascending: false });
 
   if (category && category !== 'All') {
     query = query.ilike('category', `%${category}%`);
@@ -66,26 +69,39 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ s
 
       {/* Grid Movies */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 md:gap-8 pb-12">
-        {movies?.map((movie) => (
-            <Link href={`/movies/${movie.id}`} key={movie.id} className="flex flex-col group">
-            <div className="ticket-cutout-top bg-gradient-to-b from-red-600 to-red-500 rounded-3xl overflow-hidden relative shadow-xl transform transition-transform group-hover:scale-[1.02] md:group-hover:scale-105 duration-300">
-              <div className="aspect-[4/5] bg-gray-800 relative">
-                <img 
-                  src={movie.poster_url || "/inception-poster.jpg"}
-                  alt={movie.title}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="p-4 md:p-6 text-center bg-gradient-to-b from-red-500 to-red-700">
-                <h3 className="font-serif font-bold text-lg md:text-xl mb-1 md:mb-2 truncate text-white">{movie.title}</h3>
-                <div className="flex items-center justify-center gap-3 text-red-100 text-xs md:text-sm">
-                  <span>Action/Drama</span>
-                  <span>4.5</span>
+        {movies?.map((movie) => {
+          // Check if movie has any upcoming shows
+          const now = new Date().getTime();
+          const hasUpcomingShows = movie.shows?.some((s: any) => new Date(s.start_time).getTime() > now);
+
+          return (
+            <Link href={`/movies/${movie.id}`} key={movie.id} className="flex flex-col group relative">
+              <div className="ticket-cutout-top bg-gradient-to-b from-red-600 to-red-500 rounded-3xl overflow-hidden relative shadow-xl transform transition-transform group-hover:scale-[1.02] md:group-hover:scale-105 duration-300">
+                <div className="aspect-[4/5] bg-gray-800 relative">
+                  <img 
+                    src={movie.poster_url || "/inception-poster.jpg"}
+                    alt={movie.title}
+                    className="w-full h-full object-cover"
+                  />
+                  {!hasUpcomingShows && (
+                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center backdrop-blur-[2px]">
+                      <span className="bg-red-600 text-white font-bold px-4 py-2 rounded-full transform -rotate-12 border-2 border-white shadow-xl">
+                        Coming Soon
+                      </span>
+                    </div>
+                  )}
+                </div>
+                <div className="p-4 md:p-6 text-center bg-gradient-to-b from-red-500 to-red-700">
+                  <h3 className="font-serif font-bold text-lg md:text-xl mb-1 md:mb-2 truncate text-white">{movie.title}</h3>
+                  <div className="flex items-center justify-center gap-3 text-red-100 text-xs md:text-sm">
+                    <span>Action/Drama</span>
+                    <span>4.5</span>
+                  </div>
                 </div>
               </div>
-            </div>
-          </Link>
-        ))}
+            </Link>
+          );
+        })}
         {movies?.length === 0 && (
           <div className="text-gray-500 italic py-10 w-full col-span-full text-center">No movies available</div>
         )}

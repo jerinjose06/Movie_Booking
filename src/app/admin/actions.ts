@@ -220,35 +220,48 @@ export async function createShow(formData: FormData) {
 
   const movie_id = formData.get('movie_id') as string;
   const auditorium_id = formData.get('auditorium_id') as string;
-  const start_time = formData.get('start_time') as string;
-  const end_time = formData.get('end_time') as string;
+  const dateStr = formData.get('start_date') as string; // from our UI update
+  const showTimesStr = formData.get('show_times') as string;
 
+  console.log("createShow called with:", { movie_id, auditorium_id, dateStr, showTimesStr });
+
+  if (!dateStr || !showTimesStr) throw new Error("Missing date or show times");
+
+  const showTimes = showTimesStr.split(',').map(t => t.trim());
   const adminClient = createAdminClient();
-  const { data: show, error } = await adminClient.from('shows').insert({
-    movie_id,
-    auditorium_id,
-    start_time,
-    end_time,
-    base_price_multiplier: 1.0
-  }).select().single();
-
-  if (error) throw new Error(error.message);
-
+  
+  // Get all seat rows and seats for the auditorium once
   const { data: seatRows } = await adminClient.from('seat_rows').select('id, seats(id)').eq('auditorium_id', auditorium_id);
   
+  const allSeatIds: string[] = [];
   if (seatRows) {
-    const showSeats = [];
     for (const row of seatRows) {
       for (const seat of row.seats) {
-        showSeats.push({
-          show_id: show.id,
-          seat_id: seat.id,
-          status: 'AVAILABLE'
-        });
+        allSeatIds.push(seat.id);
       }
     }
+  }
+
+  // Loop over each time and create a show
+  for (const time of showTimes) {
+    const start_time = new Date(`${dateStr}T${time}:00`).toISOString();
     
-    if (showSeats.length > 0) {
+    const { data: show, error } = await adminClient.from('shows').insert({
+      movie_id,
+      auditorium_id,
+      start_time,
+      base_price_multiplier: 1.0
+    }).select().single();
+
+    if (error) throw new Error(error.message);
+
+    if (allSeatIds.length > 0) {
+      const showSeats = allSeatIds.map(seatId => ({
+        show_id: show.id,
+        seat_id: seatId,
+        status: 'AVAILABLE'
+      }));
+      
       const { error: ssError } = await adminClient.from('show_seats').insert(showSeats);
       if (ssError) console.error("Failed to insert show_seats", ssError);
     }
@@ -442,3 +455,5 @@ export async function updateMovie(movieId: string, formData: FormData) {
   }
 }
 
+
+export async function cancelShow(showId: string) { const { isAuthorized } = await checkAdmin(); if (!isAuthorized) throw new Error('Unauthorized'); const adminClient = createAdminClient(); const { data: bookings } = await adminClient.from('bookings').select('id').eq('show_id', showId); const bookingIds = bookings?.map(b => b.id) || []; if (bookingIds.length > 0) { await adminClient.from('tickets').delete().in('booking_id', bookingIds); } await adminClient.from('bookings').delete().eq('show_id', showId); await adminClient.from('show_seats').delete().eq('show_id', showId); const { error } = await adminClient.from('shows').delete().eq('id', showId); if (error) throw new Error(error.message); revalidatePath('/admin/shows'); }

@@ -34,6 +34,16 @@ export default async function BookingPage({ params }: { params: Promise<{ showId
     notFound();
   }
 
+  if (new Date(show.start_time) < new Date()) {
+    return (
+      <div className="container mx-auto px-4 py-32 text-center min-h-[70vh] flex flex-col items-center justify-center">
+        <h1 className="text-4xl font-serif font-bold text-white mb-4">Show Unavailable</h1>
+        <p className="text-gray-400 mb-8 max-w-md mx-auto">This show has already ended or is no longer available for booking.</p>
+        <a href="/" className="bg-red-600 hover:bg-red-500 text-white px-8 py-3.5 rounded-xl font-bold transition-all shadow-lg shadow-red-900/20">Back to Home</a>
+      </div>
+    );
+  }
+
   // Flatten seat data for client
   const baseMultiplier = show.base_price_multiplier || 1;
   const flattenedSeats = seats?.map(s => {

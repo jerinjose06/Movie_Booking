@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createMovie } from '../../actions';
 import { CustomSelect } from '@/components/admin/CustomSelect';
+import toast from 'react-hot-toast';
 
 export default function NewMoviePage() {
   const [loading, setLoading] = useState(false);
@@ -18,7 +19,7 @@ export default function NewMoviePage() {
       await createMovie(formData);
       router.push('/admin/movies');
     } catch (err: any) {
-      alert("Error: " + err.message);
+      toast.error(err.message);
       setLoading(false);
     }
   };
