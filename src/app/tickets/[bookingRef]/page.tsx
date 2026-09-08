@@ -1,4 +1,4 @@
-import { createClient } from '@/utils/supabase/server';
+import { createAdminClient } from '@/utils/supabase/admin';
 import { notFound } from 'next/navigation';
 import QRCode from 'qrcode';
 import { TicketCardClient } from './TicketCardClient';
@@ -10,7 +10,7 @@ export default async function TicketPage({
   params: Promise<{ bookingRef: string }>;
   searchParams: Promise<{ scanned?: string }>;
 }) {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   const { bookingRef } = await params;
   const { scanned } = await searchParams;
 

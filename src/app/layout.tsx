@@ -15,10 +15,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang='en' className={`${inter.variable} ${playfair.variable} dark`}>
-      <body className='min-h-screen bg-[#121212] text-white antialiased font-sans'>
+      <body className='min-h-screen bg-[#121212] text-white antialiased font-sans flex flex-col md:flex-row'>
         <ToasterProvider />
         <Navbar />
-        <main className="min-h-screen w-full relative">
+        <main className="flex-1 overflow-auto min-w-0 min-h-screen relative bg-[#121212]">
           {children}
         </main>
       </body>

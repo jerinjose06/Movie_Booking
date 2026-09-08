@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -89,65 +89,71 @@ export function HomeFilter() {
   return (
     <>
       {/* Search Banner */}
-      <div className="relative ticket-cutout bg-gradient-to-r from-red-600 to-red-500 p-6 md:p-12 rounded-2xl md:rounded-3xl mb-8 md:mb-12 shadow-lg shadow-red-900/20 max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 md:gap-8">
-        <h2 className="text-2xl md:text-3xl font-serif text-white leading-snug text-center md:text-left w-full md:w-auto">
-          Which movie are you going<br className="hidden md:block"/>to show today?
-        </h2>
+      <div className="relative mb-8 md:mb-12 shadow-lg shadow-red-900/20 max-w-4xl mx-auto rounded-2xl md:rounded-3xl">
+        {/* Background layer with the ticket cutout mask */}
+        <div className="absolute inset-0 ticket-cutout bg-gradient-to-r from-red-600 to-red-500 rounded-2xl md:rounded-3xl pointer-events-none"></div>
         
-        {/* Search input container with suggestions */}
-        <div className="relative w-full max-w-md" ref={containerRef}>
-          <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none z-10">
-            <Search className="h-5 w-5 text-gray-400" />
-          </div>
-          <input 
-            type="text" 
-            name="search-input"
-            placeholder="Search Here.." 
-            value={searchText}
-            onFocus={() => setShowSuggestions(true)}
-            onChange={(e) => {
-              setSearchText(e.target.value);
-              setShowSuggestions(true);
-            }}
-            className="w-full bg-white text-black rounded-full py-3 md:py-4 pl-12 pr-6 outline-none text-sm md:text-base font-sans relative z-10"
-          />
-
-          {/* Autocomplete Suggestions Dropdown */}
-          {showSuggestions && suggestions.length > 0 && (
-            <div className="absolute left-0 right-0 mt-2 bg-[#1a1a1a] border border-gray-800 rounded-2xl shadow-2xl p-2 z-50 max-h-64 overflow-y-auto space-y-1">
-              <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wider px-3 py-1.5 border-b border-gray-850 mb-1">
-                Suggested Movies
-              </div>
-              {suggestions.map((movie) => (
-                <Link 
-                  href={`/movies/${movie.id}`} 
-                  key={movie.id}
-                  className="flex items-center gap-3 p-2 rounded-xl hover:bg-gray-850 transition-colors group text-left"
-                  onClick={() => setShowSuggestions(false)}
-                >
-                  {movie.poster_url ? (
-                    <img 
-                      src={movie.poster_url} 
-                      alt={movie.title} 
-                      className="w-8 h-10 object-cover rounded-lg bg-gray-900 flex-shrink-0"
-                    />
-                  ) : (
-                    <div className="w-8 h-10 bg-gray-900 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <Film className="w-4 h-4 text-gray-500" />
-                    </div>
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm font-semibold text-white group-hover:text-red-500 transition-colors truncate">
-                      {movie.title}
-                    </div>
-                    <div className="text-xs text-gray-400 truncate">
-                      {movie.category || 'Movie'}
-                    </div>
-                  </div>
-                </Link>
-              ))}
+        {/* Content layer (unmasked, so dropdown can overflow) */}
+        <div className="relative p-6 md:p-12 flex flex-col md:flex-row items-center justify-between gap-6 md:gap-8">
+          <h2 className="text-2xl md:text-3xl font-serif text-white leading-snug text-center md:text-left w-full md:w-auto">
+            Which movie are you going<br className="hidden md:block"/>to show today?
+          </h2>
+          
+          {/* Search input container with suggestions */}
+          <div className="relative w-full max-w-md" ref={containerRef}>
+            <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none z-10">
+              <Search className="h-5 w-5 text-gray-400" />
             </div>
-          )}
+            <input 
+              type="text" 
+              name="search-input"
+              placeholder="Search Here.." 
+              value={searchText}
+              onFocus={() => setShowSuggestions(true)}
+              onChange={(e) => {
+                setSearchText(e.target.value);
+                setShowSuggestions(true);
+              }}
+              className="w-full bg-white text-black rounded-full py-3 md:py-4 pl-12 pr-6 outline-none text-sm md:text-base font-sans relative z-10"
+            />
+
+            {/* Autocomplete Suggestions Dropdown */}
+            {showSuggestions && suggestions.length > 0 && (
+              <div className="absolute left-0 right-0 mt-2 bg-[#1a1a1a] border border-gray-800 rounded-2xl shadow-2xl p-2 z-50 max-h-64 overflow-y-auto space-y-1">
+                <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wider px-3 py-1.5 border-b border-gray-850 mb-1">
+                  Suggested Movies
+                </div>
+                {suggestions.map((movie) => (
+                  <Link 
+                    href={`/movies/${movie.id}`} 
+                    key={movie.id}
+                    className="flex items-center gap-3 p-2 rounded-xl hover:bg-gray-850 transition-colors group text-left"
+                    onClick={() => setShowSuggestions(false)}
+                  >
+                    {movie.poster_url ? (
+                      <img 
+                        src={movie.poster_url} 
+                        alt={movie.title} 
+                        className="w-8 h-10 object-cover rounded-lg bg-gray-900 flex-shrink-0"
+                      />
+                    ) : (
+                      <div className="w-8 h-10 bg-gray-900 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <Film className="w-4 h-4 text-gray-500" />
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-semibold text-white group-hover:text-red-500 transition-colors truncate">
+                        {movie.title}
+                      </div>
+                      <div className="text-xs text-gray-400 truncate">
+                        {movie.category || 'Movie'}
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

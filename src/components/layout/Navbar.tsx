@@ -35,58 +35,80 @@ export function Navbar() {
   };
 
   return (
-    <nav className='border-b border-gray-800 bg-[#1a1a1a] p-4 md:p-6 relative z-50'>
-      <div className="flex items-center justify-between">
-        <div className="flex gap-8 items-center">
-          <Link href='/' className='font-serif font-bold text-2xl text-red-500'>Movie Fan</Link>
-          <div className="hidden md:flex gap-8 items-center">
-            <Link href='/movies' className='text-gray-300 hover:text-white transition-colors py-2'>Movies</Link>
-            <Link href='/theatres' className='text-gray-300 hover:text-white transition-colors py-2'>Theatres</Link>
-          </div>
-        </div>
-        
-        <div className="hidden md:flex gap-6 items-center">
-          <Link href='/account/bookings' className='text-gray-300 hover:text-white transition-colors py-2'>Account</Link>
-          <Link href='/admin' className='text-gray-300 hover:text-white transition-colors py-2'>Admin</Link>
-          {user && (
-            <button 
-              onClick={handleSignOut}
-              className="flex items-center gap-1.5 text-gray-400 hover:text-red-500 transition-colors py-2 text-sm font-semibold"
-            >
-              <LogOut className="w-4 h-4" />
-              <span>Log Out</span>
-            </button>
-          )}
-        </div>
-
-        {/* Mobile Menu Button */}
-        <button 
-          className="md:hidden p-2 text-gray-300 hover:text-white"
+    <>
+      {/* Mobile Top Bar */}
+      <div className="md:hidden flex items-center justify-between px-4 py-3.5 bg-[#1a1a1a] border-b border-gray-800 sticky top-0 z-40">
+        <Link href="/" className="text-lg font-serif font-bold tracking-tight text-white">
+          Movie <span className="text-red-500">Fan</span>
+        </Link>
+        <button
           onClick={() => setIsOpen(!isOpen)}
+          className="p-2 text-gray-300 hover:text-white rounded-lg hover:bg-gray-800 transition-colors"
           aria-label="Toggle menu"
         >
-          {isOpen ? <X size={28} /> : <Menu size={28} />}
+          {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
       </div>
 
-      {/* Mobile Menu Dropdown */}
+      {/* Mobile Overlay */}
       {isOpen && (
-        <div className="md:hidden absolute top-full left-0 w-full bg-[#1a1a1a] border-b border-gray-800 shadow-xl flex flex-col px-4 py-4 space-y-4">
-          <Link href='/movies' onClick={() => setIsOpen(false)} className='text-xl text-gray-300 hover:text-white py-3 border-b border-gray-800/50'>Movies</Link>
-          <Link href='/theatres' onClick={() => setIsOpen(false)} className='text-xl text-gray-300 hover:text-white py-3 border-b border-gray-800/50'>Theatres</Link>
-          <Link href='/account/bookings' onClick={() => setIsOpen(false)} className='text-xl text-gray-300 hover:text-white py-3 border-b border-gray-800/50'>Account</Link>
-          <Link href='/admin' onClick={() => setIsOpen(false)} className='text-xl text-gray-300 hover:text-white py-3 border-b border-gray-800/50'>Admin</Link>
-          {user && (
-            <button 
-              onClick={() => { handleSignOut(); setIsOpen(false); }}
-              className="text-left text-xl text-gray-400 hover:text-red-500 transition-colors py-3 flex items-center gap-2"
-            >
-              <LogOut className="w-5 h-5" />
-              <span>Log Out</span>
-            </button>
-          )}
-        </div>
+        <div
+          className="md:hidden fixed inset-0 bg-black/60 z-40"
+          onClick={() => setIsOpen(false)}
+        />
       )}
-    </nav>
+
+      {/* Sidebar: always visible on md+, slide-in drawer on mobile */}
+      <aside
+        className={`
+          fixed md:sticky top-0 left-0 z-50 h-screen w-64 bg-[#1a1a1a] border-r border-gray-800 flex flex-col
+          transition-transform duration-300 ease-in-out
+          ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+          md:translate-x-0
+        `}
+      >
+        {/* Desktop title */}
+        <div className="hidden md:flex p-6 border-b border-gray-800 justify-between items-center">
+          <Link href="/" className="text-2xl font-serif font-bold tracking-tight text-white">
+            Movie <span className="text-red-500">Fan</span>
+          </Link>
+        </div>
+
+        <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+          <Link href='/' onClick={() => setIsOpen(false)} className='flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-600/10 hover:text-red-400 transition-all font-medium text-gray-300'>
+            <span>Home</span>
+          </Link>
+          <Link href='/movies' onClick={() => setIsOpen(false)} className='flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-600/10 hover:text-red-400 transition-all font-medium text-gray-300'>
+            <span>Movies</span>
+          </Link>
+          <Link href='/theatres' onClick={() => setIsOpen(false)} className='flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-600/10 hover:text-red-400 transition-all font-medium text-gray-300'>
+            <span>Theatres</span>
+          </Link>
+          <Link href='/account/bookings' onClick={() => setIsOpen(false)} className='flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-600/10 hover:text-red-400 transition-all font-medium text-gray-300'>
+            <span>Account</span>
+          </Link>
+          
+          <div className="border-t border-gray-800 my-4 pt-4 space-y-1">
+            <Link href='/admin' onClick={() => setIsOpen(false)} className='flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-800 hover:text-white transition-all font-medium text-gray-400'>
+              <span>Admin Panel</span>
+            </Link>
+
+            {user ? (
+              <button 
+                onClick={() => { handleSignOut(); setIsOpen(false); }}
+                className="w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-600/10 hover:text-red-400 transition-all font-medium text-gray-300"
+              >
+                <LogOut className="w-5 h-5 text-red-500" />
+                <span>Log Out</span>
+              </button>
+            ) : (
+              <Link href='/login' onClick={() => setIsOpen(false)} className='flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-600/10 hover:text-red-400 transition-all font-medium text-gray-300'>
+                <span>Log In</span>
+              </Link>
+            )}
+          </div>
+        </nav>
+      </aside>
+    </>
   );
 }
