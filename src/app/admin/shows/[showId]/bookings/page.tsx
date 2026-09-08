@@ -1,4 +1,4 @@
-import { createClient } from '@/utils/supabase/server';
+import { createAdminClient } from '@/utils/supabase/admin';
 import { Calendar, IndianRupee, ArrowLeft, Armchair } from 'lucide-react';
 import Link from 'next/link';
 
@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export default async function ShowBookingsPage({ params }: { params: Promise<{ showId: string }> }) {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   const { showId } = await params;
 
   // First fetch the show details to display in the header

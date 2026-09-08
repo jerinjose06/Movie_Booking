@@ -1,11 +1,11 @@
-import { createClient } from '@/utils/supabase/server';
+import { createAdminClient } from '@/utils/supabase/admin';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { EditMovieForm } from './EditMovieForm';
 
 export default async function EditMoviePage({ params }: { params: Promise<{ movieId: string }> }) {
   const { movieId } = await params;
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   const { data: movie } = await supabase
     .from('movies')

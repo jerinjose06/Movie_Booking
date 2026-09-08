@@ -1,4 +1,4 @@
-import { createClient } from '@/utils/supabase/server';
+import { createAdminClient } from '@/utils/supabase/admin';
 import Link from 'next/link';
 import { Calendar, MapPin } from 'lucide-react';
 import { CancelShowButton } from './CancelShowButton';
@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export default async function ShowsPage() {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   const { data: shows } = await supabase
     .from('shows')
     .select('*, movies(title), auditoriums(name, theatres(name))')

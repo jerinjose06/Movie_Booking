@@ -53,7 +53,12 @@ export default async function BookingDetailPage({
   }).filter(Boolean) || [];
 
   // Generate real QR code linking to digital ticket
-  const verificationUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/tickets/${booking.booking_reference}?scanned=true`;
+  const headersList = await import('next/headers').then(m => m.headers());
+  const host = headersList.get('host') || 'localhost:3000';
+  const protocol = headersList.get('x-forwarded-proto') || (host.includes('localhost') ? 'http' : 'https');
+  const baseUrl = `${protocol}://${host}`;
+  const verificationUrl = `${baseUrl}/tickets/${booking.booking_reference}?scanned=true`;
+  
   let qrCodeDataUrl = '';
   try {
     qrCodeDataUrl = await QRCode.toDataURL(verificationUrl, {

@@ -1,9 +1,9 @@
-import { createClient } from '@/utils/supabase/server';
+import { createAdminClient } from '@/utils/supabase/admin';
 import Link from 'next/link';
 
 export default async function TheatreDetailsPage({ params }: { params: Promise<{ theatreId: string }> }) {
   const { theatreId } = await params;
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   const { data: theatre } = await supabase.from('theatres').select('*').eq('id', theatreId).single();
   const { data: auditoriums } = await supabase.from('auditoriums').select('*').eq('theatre_id', theatreId).order('name');
 

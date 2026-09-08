@@ -75,7 +75,11 @@ export default async function TicketPage({
   }
 
   // Generate QR Code data URL with direct verification link and seat numbers
-  const verificationUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/tickets/${bookingRef}?scanned=true`;
+  const headersList = await import('next/headers').then(m => m.headers());
+  const host = headersList.get('host') || 'localhost:3000';
+  const protocol = headersList.get('x-forwarded-proto') || (host.includes('localhost') ? 'http' : 'https');
+  const baseUrl = `${protocol}://${host}`;
+  const verificationUrl = `${baseUrl}/tickets/${bookingRef}?scanned=true`;
   
   let qrCodeDataUrl = '';
   try {

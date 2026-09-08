@@ -1,4 +1,4 @@
-import { createClient } from '@/utils/supabase/server';
+import { createAdminClient } from '@/utils/supabase/admin';
 import { Calendar, IndianRupee } from 'lucide-react';
 import { BookingsFilter } from './BookingsFilter';
 
@@ -7,7 +7,7 @@ export const revalidate = 0;
 
 export default async function BookingsPage({ searchParams }: { searchParams: { date?: string } }) {
   const { date } = await searchParams;
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   let query = supabase
     .from('bookings')
     .select('*, profiles(full_name), shows!inner(start_time, movies(title), auditoriums(name, theatres(name)))')

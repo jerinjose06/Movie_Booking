@@ -1,11 +1,11 @@
-import { createClient } from '@/utils/supabase/server';
+import { createAdminClient } from '@/utils/supabase/admin';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ScreenConfigForm } from './ScreenConfigForm';
 
 export default async function AuditoriumDetailsPage({ params }: { params: Promise<{ auditoriumId: string }> }) {
   const { auditoriumId } = await params;
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   
   // Get screen details
   const { data: auditorium } = await supabase
