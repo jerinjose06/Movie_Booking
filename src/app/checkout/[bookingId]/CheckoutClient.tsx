@@ -41,9 +41,52 @@ export function CheckoutClient({ booking }: { booking: any }) {
     }
   };
 
+  const [timeLeft, setTimeLeft] = useState<number>(0);
+
+  React.useEffect(() => {
+    // 10 minutes from booking creation
+    const expiresAt = new Date(booking.created_at).getTime() + 10 * 60 * 1000;
+    
+    const interval = setInterval(() => {
+      const now = Date.now();
+      const remaining = expiresAt - now;
+      
+      if (remaining <= 0) {
+        clearInterval(interval);
+        toast.error('Session expired. The seats have been released.');
+        clearSelection();
+        clearTimer();
+        router.push('/'); // Redirect home or to show page
+      } else {
+        setTimeLeft(remaining);
+      }
+    }, 1000);
+    
+    // Initial calculation
+    const remaining = expiresAt - Date.now();
+    if (remaining <= 0) {
+      toast.error('Session expired. The seats have been released.');
+      router.push('/');
+    } else {
+      setTimeLeft(remaining);
+    }
+    
+    return () => clearInterval(interval);
+  }, [booking.created_at, router, clearSelection, clearTimer]);
+
+  const minutes = Math.floor(timeLeft / 60000);
+  const seconds = Math.floor((timeLeft % 60000) / 1000);
+
   return (
     <div className="bg-[#1a1a1a] p-6 md:p-8 rounded-2xl border border-gray-800 shadow-xl max-w-xl mx-auto text-white">
-      <h2 className="text-xl md:text-2xl font-serif font-bold mb-6">Payment Summary</h2>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-xl md:text-2xl font-serif font-bold">Payment Summary</h2>
+        <div className="flex items-center gap-2 bg-red-950/40 border border-red-800/50 px-3 py-1.5 rounded-full text-red-500 font-mono text-sm">
+          <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+          {minutes.toString().padStart(2, '0')}:{seconds.toString().padStart(2, '0')}
+        </div>
+      </div>
+      
       <div className="bg-[#121212] p-4 md:p-5 rounded-xl mb-6 border border-gray-800">
         <div className="flex justify-between items-center text-lg font-bold">
           <span className="text-gray-300">Total Amount</span>
@@ -54,7 +97,7 @@ export function CheckoutClient({ booking }: { booking: any }) {
       <form onSubmit={handlePayment} className="space-y-4">
         <button 
           type="submit" 
-          disabled={isProcessing}
+          disabled={isProcessing || timeLeft <= 0}
           className="w-full bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white py-4 rounded-xl font-serif font-bold text-lg mt-6 transition-all shadow-lg shadow-red-950/30 flex justify-center items-center"
         >
           {isProcessing ? (

@@ -17,7 +17,7 @@ export default async function BookingPage({ params }: { params: Promise<{ showId
     supabase.from('profiles').select('*').eq('id', user.id).single(),
     supabase.from('shows').select('*, movies(*), auditoriums(*, theatres(*))').eq('id', showId).single(),
     supabase.from('show_seats').select(`
-      id, show_id, seat_id, status, held_by,
+      id, show_id, seat_id, status, held_by, hold_expires_at,
       seats (
         id, seat_number, pos_x, pos_y, pos_z,
         seat_rows ( id, row_name ),
@@ -54,6 +54,8 @@ export default async function BookingPage({ params }: { params: Promise<{ showId
 
   // Flatten seat data for client
   const baseMultiplier = show.base_price_multiplier || 1;
+  const now = new Date();
+  
   const flattenedSeats = seats?.map(s => {
     const seatData: any = Array.isArray(s.seats) ? s.seats[0] : s.seats;
     const rowData = Array.isArray(seatData?.seat_rows) ? seatData?.seat_rows[0] : seatData?.seat_rows;
@@ -61,6 +63,16 @@ export default async function BookingPage({ params }: { params: Promise<{ showId
     
     const basePrice = typeData?.base_price || 10.00;
     const price = basePrice * baseMultiplier;
+    
+    // Check if the hold is expired
+    let computedStatus = s.status;
+    let computedHeldBy = s.held_by;
+    if (s.status === 'HELD' && s.hold_expires_at) {
+      if (new Date(s.hold_expires_at) < now) {
+        computedStatus = 'AVAILABLE';
+        computedHeldBy = null;
+      }
+    }
     
     return {
       id: s.seat_id,
@@ -73,8 +85,8 @@ export default async function BookingPage({ params }: { params: Promise<{ showId
       pos_y: seatData?.pos_y,
       pos_z: seatData?.pos_z,
       type_id: typeData?.id || 1,
-      status: s.status,
-      held_by: s.held_by,
+      status: computedStatus,
+      held_by: computedHeldBy,
       price: price
     };
   }) || [];

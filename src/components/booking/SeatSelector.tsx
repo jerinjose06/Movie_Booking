@@ -46,14 +46,24 @@ export function SeatSelector({ showId, initialSeats, userId }: SeatSelectorProps
 
   const handleSeatUpdate = useCallback((newSeat: any) => {
     if (newSeat) {
+      const now = new Date();
+      let computedStatus = newSeat.status;
+      let computedHeldBy = newSeat.held_by;
+      if (newSeat.status === 'HELD' && newSeat.hold_expires_at) {
+        if (new Date(newSeat.hold_expires_at) < now) {
+          computedStatus = 'AVAILABLE';
+          computedHeldBy = null;
+        }
+      }
+
       setSeats((currentSeats) => {
         // Use getState to avoid adding selectedSeatIds to useCallback dependencies
         const currentSelected = useBookingStore.getState().selectedSeatIds;
         // If someone else took the seat we had selected, deselect it
-        if (newSeat.status !== 'AVAILABLE' && newSeat.held_by !== userId && currentSelected.includes(newSeat.seat_id)) {
+        if (computedStatus !== 'AVAILABLE' && computedHeldBy !== userId && currentSelected.includes(newSeat.seat_id)) {
           useBookingStore.getState().toggleSeatSelection(newSeat.seat_id, true); // true = force remove local selection
         }
-        return currentSeats.map((seat) => (seat.show_seat_id === newSeat.id ? { ...seat, status: newSeat.status, held_by: newSeat.held_by } : seat));
+        return currentSeats.map((seat) => (seat.show_seat_id === newSeat.id ? { ...seat, status: computedStatus, held_by: computedHeldBy } : seat));
       });
     }
   }, [userId]);
@@ -64,15 +74,24 @@ export function SeatSelector({ showId, initialSeats, userId }: SeatSelectorProps
     // Re-fetch all seats to reconcile state
     const { data } = await localSupabase
       .from('show_seats')
-      .select('id, seat_id, status, held_by')
+      .select('id, seat_id, status, held_by, hold_expires_at')
       .eq('show_id', showId);
       
     if (data) {
+      const now = new Date();
       setSeats(currentSeats => 
         currentSeats.map(seat => {
           const remote = data.find(r => r.id === seat.show_seat_id);
           if (remote) {
-            return { ...seat, status: remote.status, held_by: remote.held_by };
+            let computedStatus = remote.status;
+            let computedHeldBy = remote.held_by;
+            if (remote.status === 'HELD' && remote.hold_expires_at) {
+              if (new Date(remote.hold_expires_at) < now) {
+                computedStatus = 'AVAILABLE';
+                computedHeldBy = null;
+              }
+            }
+            return { ...seat, status: computedStatus, held_by: computedHeldBy };
           }
           return seat;
         })
