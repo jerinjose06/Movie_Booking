@@ -20,7 +20,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ s
   const { search, category } = await searchParams;
   let query = supabase
     .from('movies')
-    .select('*, shows(start_time)')
+    .select('*, shows(id, start_time)')
     .order('created_at', { ascending: false });
 
   if (category && category !== 'All') {
@@ -70,12 +70,20 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ s
       {/* Grid Movies */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 md:gap-8 pb-12">
         {movies?.map((movie) => {
-          // Check if movie has any upcoming shows
+          // Find first upcoming show
           const now = new Date().getTime();
-          const hasUpcomingShows = movie.shows?.some((s: any) => new Date(s.start_time).getTime() > now);
+          const upcomingShows = (movie.shows || [])
+            .filter((s: any) => new Date(s.start_time).getTime() > now)
+            .sort((a: any, b: any) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime());
+          
+          const hasUpcomingShows = upcomingShows.length > 0;
+          const firstShowId = hasUpcomingShows ? upcomingShows[0].id : null;
+          
+          // Redirect to seat selector if there's a show, else to movie details (where it says coming soon)
+          const href = firstShowId ? `/booking/${firstShowId}` : `/movies/${movie.id}`;
 
           return (
-            <Link href={`/movies/${movie.id}`} key={movie.id} className="flex flex-col group relative">
+            <Link href={href} key={movie.id} className="flex flex-col group relative">
               <div className="ticket-cutout-top bg-gradient-to-b from-red-600 to-red-500 rounded-3xl overflow-hidden relative shadow-xl transform transition-transform group-hover:scale-[1.02] md:group-hover:scale-105 duration-300">
                 <div className="aspect-[4/5] bg-gray-800 relative">
                   <img 

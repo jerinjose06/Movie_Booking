@@ -122,7 +122,13 @@ export default async function AdminDashboard() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-800/60 text-sm text-gray-300">
-              {showsRevenue?.map((show: any) => (
+              {showsRevenue?.filter((show: any) => {
+                const startTime = new Date(show.start_time).getTime();
+                const now = Date.now();
+                // Assume average duration of 3 hours (180 mins) if we don't have the exact movie duration in this RPC
+                const endTime = startTime + 180 * 60 * 1000;
+                return endTime > now;
+              }).map((show: any) => (
                 <tr key={show.show_id} className="hover:bg-gray-800/10 transition-colors">
                   <td className="px-6 py-4 font-semibold text-white">{show.movie_title}</td>
                   <td className="px-6 py-4">

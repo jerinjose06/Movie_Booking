@@ -10,8 +10,14 @@ export default async function ShowsPage() {
   const supabase = createAdminClient();
   const { data: shows } = await supabase
     .from('shows')
-    .select('*, movies(title), auditoriums(name, theatres(name))')
-    .order('start_time', { ascending: false });
+    .select('*, movies(title, duration_mins), auditoriums(name, theatres(name))')
+    .order('start_time', { ascending: true });
+
+  const activeShows = shows?.filter((show: any) => {
+    const startTime = new Date(show.start_time).getTime();
+    const durationMs = (show.movies?.duration_mins || 180) * 60 * 1000;
+    return startTime + durationMs > Date.now();
+  }) || [];
 
   return (
     <div className="p-4 md:p-8">
@@ -24,7 +30,7 @@ export default async function ShowsPage() {
 
       {/* Mobile Card View */}
       <div className="md:hidden space-y-4">
-        {shows?.map((show: any) => (
+        {activeShows.map((show: any) => (
           <div key={show.id} className="bg-[#1a1a1a] border border-gray-800 rounded-2xl p-4 shadow-lg space-y-3">
             <div className="flex justify-between items-start">
               <h3 className="text-sm font-semibold text-white">{show.movies?.title}</h3>
@@ -46,8 +52,8 @@ export default async function ShowsPage() {
             </div>
           </div>
         ))}
-        {(!shows || shows.length === 0) && (
-          <div className="text-center py-8 text-gray-500 italic font-serif">No shows scheduled.</div>
+        {activeShows.length === 0 && (
+          <div className="text-center py-8 text-gray-500 italic font-serif">No active shows scheduled.</div>
         )}
       </div>
 
@@ -65,7 +71,7 @@ export default async function ShowsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-800">
-              {shows?.map((show: any) => (
+              {activeShows.map((show: any) => (
                 <tr key={show.id} className="hover:bg-gray-800/20 transition-colors">
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{show.movies?.title}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
@@ -83,10 +89,10 @@ export default async function ShowsPage() {
                   </td>
                 </tr>
               ))}
-              {(!shows || shows.length === 0) && (
+              {activeShows.length === 0 && (
                 <tr>
                   <td colSpan={5} className="px-6 py-8 text-center text-sm text-gray-500 italic font-serif">
-                    No shows scheduled.
+                    No active shows scheduled.
                   </td>
                 </tr>
               )}

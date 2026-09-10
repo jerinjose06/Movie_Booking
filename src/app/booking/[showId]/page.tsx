@@ -44,6 +44,14 @@ export default async function BookingPage({ params }: { params: Promise<{ showId
     );
   }
 
+  // Fetch all upcoming shows for this movie to render Date/Time picker
+  const { data: upcomingShows } = await supabase
+    .from('shows')
+    .select('id, start_time, auditorium_id, auditoriums(name, theatres(name))')
+    .eq('movie_id', show.movie_id)
+    .gte('start_time', new Date().toISOString())
+    .order('start_time', { ascending: true });
+
   // Flatten seat data for client
   const baseMultiplier = show.base_price_multiplier || 1;
   const flattenedSeats = seats?.map(s => {
@@ -72,6 +80,6 @@ export default async function BookingPage({ params }: { params: Promise<{ showId
   }) || [];
 
   return (
-    <BookingClient show={show} initialSeats={flattenedSeats} userProfile={profile} />
+    <BookingClient show={show} initialSeats={flattenedSeats} userProfile={profile} upcomingShows={upcomingShows || []} />
   );
 }
